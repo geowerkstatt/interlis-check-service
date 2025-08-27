@@ -81,6 +81,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         {
             ArgumentNullException.ThrowIfNull(request);
             if (!ilitoolsEnvironment.IsIli2GpkgInitialized) throw new InvalidOperationException("ili2gpkg is not properly initialized.");
+            if (request.AdditionalCatalogueFilePaths.Count > 0) throw new InvalidOperationException("Additional catalogue files are not supported for GPKG validation, aborting validation.");
 
             logger.LogInformation("Starting validation of {TransferFile} using ili2gpkg.", request.TransferFileName);
 
