@@ -7,12 +7,13 @@ using Moq.Protected;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Geowerkstatt.Ilicop.Web.Services
+namespace Geowerkstatt.Ilicop.Ilitools
 {
     [TestClass]
     [DeploymentItem("testdata/mock.zip")]
@@ -44,12 +45,12 @@ namespace Geowerkstatt.Ilicop.Web.Services
         {
             var ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT"),
+                InstallationDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT"),
                 CacheDir = Path.Combine(TestContext.DeploymentDirectory, "ARKSHARK"),
                 EnableGpkgValidation = false,
             };
 
-            var configValues = new Dictionary<string, string> { { "ILIVALIDATOR_VERSION", "1.13.2" } };
+            var configValues = new Dictionary<string, string> { { "ILIVALIDATOR_VERSION", "0.0.0" } };
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(configValues)
                 .Build();
@@ -78,11 +79,11 @@ namespace Geowerkstatt.Ilicop.Web.Services
             await service.StartAsync(CancellationToken.None);
 
             // Verify environment variables are set
-            Assert.AreEqual("1.13.2", Environment.GetEnvironmentVariable("ILIVALIDATOR_VERSION"));
+            Assert.AreEqual("0.0.0", Environment.GetEnvironmentVariable("ILIVALIDATOR_VERSION"));
             Assert.AreEqual(Path.Combine(TestContext.DeploymentDirectory, "ARKSHARK"), Environment.GetEnvironmentVariable("ILI_CACHE"));
 
             // Verify files were extracted
-            var installDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT", "ilivalidator", "1.13.2");
+            var installDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT", "ilivalidator", "0.0.0");
             Assert.IsTrue(Directory.Exists(installDir), "Install directory should exist");
 
             var files = Directory.GetFiles(installDir, "*", SearchOption.AllDirectories);
@@ -94,14 +95,14 @@ namespace Geowerkstatt.Ilicop.Web.Services
         {
             var ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = "PICARESQUEOASIS",
+                InstallationDir = "PICARESQUEOASIS",
                 EnableGpkgValidation = true,
             };
 
             var configValues = new Dictionary<string, string>
             {
-                { "ILIVALIDATOR_VERSION", "1.14.9" },
-                { "ILI2GPKG_VERSION", "4.7.0" },
+                { "ILIVALIDATOR_VERSION", "77.33.0" },
+                { "ILI2GPKG_VERSION", "5.999.7" },
             };
 
             var configuration = new ConfigurationBuilder()
@@ -146,8 +147,8 @@ namespace Geowerkstatt.Ilicop.Web.Services
             await service.StartAsync(CancellationToken.None);
 
             // Verify both environment variables are set
-            Assert.AreEqual("1.14.9", Environment.GetEnvironmentVariable("ILIVALIDATOR_VERSION"));
-            Assert.AreEqual("4.7.0", Environment.GetEnvironmentVariable("ILI2GPKG_VERSION"));
+            Assert.AreEqual("77.33.0", Environment.GetEnvironmentVariable("ILIVALIDATOR_VERSION"));
+            Assert.AreEqual("5.999.7", Environment.GetEnvironmentVariable("ILI2GPKG_VERSION"));
         }
 
         [TestMethod]
@@ -155,18 +156,19 @@ namespace Geowerkstatt.Ilicop.Web.Services
         {
             var ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = "STELLARWITCH",
+                InstallationDir = "STELLARWITCH",
                 EnableGpkgValidation = false,
             };
 
-            var configValues = new Dictionary<string, string> { { "ILIVALIDATOR_VERSION", "1.14.9" } };
+            var configValues = new Dictionary<string, string> { { "ILIVALIDATOR_VERSION", "0.0.0" } };
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(configValues)
                 .Build();
 
             // Pre-create the install directory
-            var installDir = Path.Combine(TestContext.DeploymentDirectory, "STELLARWITCH", "ilivalidator", "1.14.9");
+            var installDir = Path.Combine(TestContext.DeploymentDirectory, "STELLARWITCH", "ilivalidator", "0.0.0");
             Directory.CreateDirectory(installDir);
+            ZipFile.ExtractToDirectory("mock.zip", installDir, overwriteFiles: true);
 
             var service = new IlitoolsBootstrapService(loggerMock.Object, configuration, httpClient, ilitoolsEnvironment);
 
@@ -176,7 +178,7 @@ namespace Geowerkstatt.Ilicop.Web.Services
             await service.StartAsync(CancellationToken.None);
 
             // Verify environment variable is still set even when skipping download
-            Assert.AreEqual("1.14.9", Environment.GetEnvironmentVariable("ILIVALIDATOR_VERSION"));
+            Assert.AreEqual("0.0.0", Environment.GetEnvironmentVariable("ILIVALIDATOR_VERSION"));
 
             // Verify no HTTP requests were made
             httpMessageHandlerMock.Protected().Verify(
@@ -194,7 +196,7 @@ namespace Geowerkstatt.Ilicop.Web.Services
         {
             var ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = "RAGESLAW",
+                InstallationDir = "RAGESLAW",
             };
 
             var configuration = new ConfigurationBuilder()

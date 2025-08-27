@@ -221,7 +221,6 @@ docker inspect --format='{{json .State.Health.Status}}' container_name
 Folgenden Komponenten müssen auf dem Entwicklungsrechner installiert sein:
 
 - Git
-- Docker
 - Visual Studio 2022 oder Visual Studio Code
 - Node.js 20 LTS
 

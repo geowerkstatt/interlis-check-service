@@ -16,11 +16,6 @@ namespace Geowerkstatt.Ilicop.Web
         DirectoryInfo HomeDirectory { get; }
 
         /// <summary>
-        /// Gets the home directory path format using the Unix path format.
-        /// </summary>
-        string HomeDirectoryPathFormat { get; }
-
-        /// <summary>
         /// Creates or overwrites the specified <paramref name="file"/>.
         /// </summary>
         /// <param name="file">The name of the file to create.</param>

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Geowerkstatt.Ilicop.Web.ValidatorHelper;
@@ -41,48 +40,6 @@ namespace Geowerkstatt.Ilicop.Web
             var configuration = CreateConfiguration(enableGpkgValidation: true);
             CollectionAssert.AreEqual(expected, GetAcceptedFileExtensionsForZipContent(configuration).ToList());
         }
-
-        [TestMethod]
-        public void GetIlivalidatorCommandWithoutBootstrap()
-        {
-            // Clear environment variable to simulate bootstrap not having run
-            Environment.SetEnvironmentVariable("ILIVALIDATOR_VERSION", null);
-            Assert.ThrowsExactly<InvalidOperationException>(() => ValidatorHelper.GetIlivalidatorCommand(CreateConfiguration(), "/test", "test.xtf"));
-        }
-
-        [TestMethod]
-        public void GetIlivalidatorCommand()
-        {
-            // Set up environment variables that the bootstrap service would set
-            Environment.SetEnvironmentVariable("ILIVALIDATOR_VERSION", "1.13.2");
-
-            AssertGetIlivalidatorCommand(
-                "dada hopp monkey:latest sh ilivalidator --log \"/PEEVEDBAGEL/ANT_log.log\" --xtflog \"/PEEVEDBAGEL/ANT_log.xtf\" --verbose \"/PEEVEDBAGEL/ANT.XTF\"",
-                "dada hopp monkey:latest sh {0}",
-                "/PEEVEDBAGEL/",
-                "ANT.XTF",
-                null);
-
-            AssertGetIlivalidatorCommand(
-                "#ilivalidator --log \"foo/bar/SETNET_log.log\" --xtflog \"foo/bar/SETNET_log.xtf\" --verbose --models \"ANGRY;SQUIRREL\" \"foo/bar/SETNET.abc\"|",
-                "#{0}|",
-                "foo/bar",
-                "SETNET.abc",
-                "ANGRY;SQUIRREL");
-
-            AssertGetIlivalidatorCommand(
-                "ilivalidator --log \"$SEA/RED/WATCH_log.log\" --xtflog \"$SEA/RED/WATCH_log.xtf\" --verbose \"$SEA/RED/WATCH.GPKG\"",
-                "{0}",
-                "$SEA/RED/",
-                "WATCH.GPKG",
-                string.Empty);
-
-            // Clean up
-            Environment.SetEnvironmentVariable("ILIVALIDATOR_VERSION", null);
-        }
-
-        private static void AssertGetIlivalidatorCommand(string expected, string commandFormat, string homeDirectory, string transferFile, string models) =>
-            Assert.AreEqual(expected, ValidatorHelper.GetIlivalidatorCommand(CreateConfiguration(commandFormat: commandFormat), homeDirectory, transferFile, models));
 
         private static IConfiguration CreateConfiguration(bool enableGpkgValidation = false, string commandFormat = "") =>
             new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>

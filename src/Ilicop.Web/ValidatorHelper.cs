@@ -1,12 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Geowerkstatt.Ilicop.Web
 {
@@ -49,95 +43,6 @@ namespace Geowerkstatt.Ilicop.Web
             }
 
             if (configuration.GetValue<bool>("ENABLE_GPKG_VALIDATION")) yield return ".gpkg";
-        }
-
-        /// <summary>
-        /// Gets the full command which can be executed on a shell in an Unix environment to validate
-        /// the specified <paramref name="transferFile"/> with ilivalidator including environment specific
-        /// command prefixes if applicable. The path created by this function uses the Unix path format.
-        /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <param name="homeDirectory">The home directory path using the Unix path format.</param>
-        /// <param name="transferFile">The transfer file name.</param>
-        /// <param name="gpkgModelNames">The extracted model names. Optional.</param>
-        /// <returns>The ilivalidator command.</returns>
-        public static string GetIlivalidatorCommand(IConfiguration configuration, string homeDirectory, string transferFile, string gpkgModelNames = null)
-        {
-            // Ensure ilitools are initialized and environment variables are set.
-            EnsureIlitoolsInitialized(configuration);
-
-            homeDirectory = Path.TrimEndingDirectorySeparator(homeDirectory);
-            var transferFileNameWithoutExtension = Path.GetFileNameWithoutExtension(transferFile);
-
-            var logPath = $"{homeDirectory}/{transferFileNameWithoutExtension}_log.log";
-            var xtfLogPath = $"{homeDirectory}/{transferFileNameWithoutExtension}_log.xtf";
-            var transferFilePath = $"{homeDirectory}/{transferFile}";
-            var commandFormat = configuration.GetSection("Validation")["CommandFormat"];
-            var options = $"--log \"{logPath}\" --xtflog \"{xtfLogPath}\" --verbose";
-            if (!string.IsNullOrEmpty(gpkgModelNames)) options = $"{options} --models \"{gpkgModelNames}\"";
-
-            return string.Format(
-                CultureInfo.InvariantCulture,
-                commandFormat,
-                $"ilivalidator {options} \"{transferFilePath}\"");
-        }
-
-        /// <summary>
-        /// Ensures that ilitools have been bootstrapped successfully.
-        /// </summary>
-        /// <param name="configuration">The current configuration.</param>
-        /// <exception cref="InvalidOperationException">If ilitools are not properly bootstrapped.</exception>
-        private static void EnsureIlitoolsInitialized(IConfiguration configuration)
-        {
-            var ilivalidatorVersion = Environment.GetEnvironmentVariable("ILIVALIDATOR_VERSION");
-            if (string.IsNullOrEmpty(ilivalidatorVersion))
-            {
-                throw new InvalidOperationException("Ilivalidator is not properly bootstrapped. Ensure IlitoolsBootstrapService has completed successfully.");
-            }
-
-            var enableGpkgValidation = configuration.GetValue<bool>("ENABLE_GPKG_VALIDATION");
-            if (enableGpkgValidation)
-            {
-                var ili2gpkgVersion = Environment.GetEnvironmentVariable("ILI2GPKG_VERSION");
-                if (string.IsNullOrEmpty(ili2gpkgVersion))
-                {
-                    throw new InvalidOperationException("ili2gpkg is not properly bootstrapped but GPKG validation is enabled. Ensure IlitoolsBootstrapService has completed successfully.");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously executes the given <paramref name="command"/> on the shell specified in <see cref="Extensions.GetShellExecutable(IConfiguration)"/>.
-        /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <param name="command">The command to execute.</param>
-        /// <param name="cancellationToken">An optional <see cref="CancellationToken"/> to cancel the asynchronous operation.</param>
-        /// <returns>The exit code that the associated process specified when it terminated.</returns>
-        public static async Task<int> ExecuteCommandAsync(IConfiguration configuration, string command, CancellationToken cancellationToken = default)
-        {
-            using var process = new Process()
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = configuration.GetShellExecutable(),
-                    Arguments = command,
-                    UseShellExecute = true,
-                },
-                EnableRaisingEvents = true,
-            };
-
-            process.Start();
-
-            try
-            {
-                await process.WaitForExitAsync(cancellationToken);
-                return process.ExitCode;
-            }
-            catch (OperationCanceledException)
-            {
-                process.Kill();
-                return 1;
-            }
         }
     }
 }

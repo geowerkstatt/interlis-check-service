@@ -23,10 +23,8 @@ namespace Geowerkstatt.Ilicop.Web
             physicalFileProvider.Initialize(id);
 
             var expectedHomeDirectory = Path.Combine(TestContext.DeploymentDirectory, id.ToString());
-            var expectedHomeDirectoryPathFormat = "$ILICOP_UPLOADS_DIR/59da9c46-dad0-41c7-b58f-8fa356d2d9fc/";
 
             Assert.AreEqual(expectedHomeDirectory, physicalFileProvider.HomeDirectory.FullName);
-            Assert.AreEqual(expectedHomeDirectoryPathFormat, physicalFileProvider.HomeDirectoryPathFormat);
         }
 
         [TestMethod]
