@@ -100,7 +100,6 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             ilitoolsEnvironment.IlivalidatorPath = jarPath;
 
             Environment.SetEnvironmentVariable("ILIVALIDATOR_VERSION", version);
-            Environment.SetEnvironmentVariable("ILIVALIDATOR_PATH", jarPath);
 
             logger.LogInformation("ilivalidator version {Version} initialized successfully at {Path}", version, jarPath);
         }
@@ -132,7 +131,6 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             ilitoolsEnvironment.Ili2GpkgPath = jarPath;
 
             Environment.SetEnvironmentVariable("ILI2GPKG_VERSION", version);
-            Environment.SetEnvironmentVariable("ILI2GPKG_PATH", jarPath);
 
             logger.LogInformation("ili2gpkg version {Version} initialized successfully at {Path}", version, jarPath);
         }
