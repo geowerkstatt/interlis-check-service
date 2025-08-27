@@ -207,6 +207,9 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             {
                 yield return "--trace";
             }
+
+            // Add model directory
+            yield return $"--modeldir {ilitoolsEnvironment.ModelRepositoryDir}";
         }
 
         /// <summary>
