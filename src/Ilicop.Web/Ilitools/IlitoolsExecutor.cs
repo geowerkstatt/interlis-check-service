@@ -209,7 +209,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             }
 
             // Add model directory
-            yield return $"--modeldir {ilitoolsEnvironment.ModelRepositoryDir}";
+            yield return $"--modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\"";
         }
 
         /// <summary>
