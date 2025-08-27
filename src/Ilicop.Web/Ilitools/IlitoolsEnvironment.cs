@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Geowerkstatt.Ilicop.Web.Ilitools
+﻿namespace Geowerkstatt.Ilicop.Web.Ilitools
 {
     /// <summary>
     /// Runtime-populated metadata about installed ilitools.
@@ -22,6 +20,11 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         /// Gets the local model repository directory.
         /// </summary>
         public string ModelRepositoryDir { get; init; }
+
+        /// <summary>
+        /// Gets the plugins directory.
+        /// </summary>
+        public string PluginsDir { get; init; }
 
         /// <summary>
         /// Indicates whether the GPKG validation should be enabled.
@@ -63,11 +66,6 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         /// </summary>
         public bool IsIli2GpkgInitialized => EnableGpkgValidation && !string.IsNullOrWhiteSpace(Ili2GpkgPath);
 
-        /// <summary>
-        /// Gets the plugins directory.
-        /// </summary>
-        public string PluginsDir => Path.Combine(InstallationDir, "plugins");
-
         /// <inheritdoc/>
         public override string ToString()
         {
@@ -78,6 +76,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
     home directory:                   {{InstallationDir ?? "unset"}}
     cache directory:                  {{CacheDir ?? "unset"}}
     model repository directory:       {{ModelRepositoryDir ?? "unset"}}
+    plugins directory:                {{PluginsDir ?? "unset"}}
     gpkg validation:                  {{(EnableGpkgValidation ? "enabled" : "disabled")}}
     ilivalidator version:             {{IlivalidatorVersion ?? "unset"}}
     ilivalidator initialized:         {{(IsIlivalidatorInitialized ? "yes" : "no")}}
