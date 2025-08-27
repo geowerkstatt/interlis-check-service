@@ -5,7 +5,6 @@ using Moq;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Geowerkstatt.Ilicop.Web.Ilitools
@@ -146,7 +145,6 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
         private ValidationRequest CreateValidationRequest(string homeDirectory, string transferFile, string modelNames = null, List<string> additionalCatalogueFilePaths = null)
         {
-            homeDirectory = homeDirectory.NormalizeUnixStylePath();
             var transferFileNameWithoutExtension = Path.GetFileNameWithoutExtension(transferFile);
             var logPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.log");
             var xtfLogPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.xtf");

@@ -74,7 +74,7 @@ namespace Geowerkstatt.Ilicop.Web
         {
             if (id == Guid.Empty) throw new ArgumentException("The specified id is not valid.", nameof(id));
 
-            var rootDirectory = configuration.GetValue<string>(rootDirectoryEnvironmentKey).NormalizeUnixStylePath();
+            var rootDirectory = configuration.GetValue<string>(rootDirectoryEnvironmentKey);
             HomeDirectory = new DirectoryInfo(rootDirectory).CreateSubdirectory(id.ToString());
 
             initialized = true;

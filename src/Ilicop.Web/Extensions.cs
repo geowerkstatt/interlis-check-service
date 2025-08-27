@@ -196,27 +196,5 @@ namespace Geowerkstatt.Ilicop.Web
 
         private static string RemoveReferencedModels(this string models) =>
             removeReferencedModelsRegex.Replace(models.Trim(), string.Empty);
-
-        /// <summary>
-        /// Creates an OS-agnostic path from the provided path string.
-        /// On Unix-like systems, absolute paths are preserved as-is.
-        /// On Windows, paths starting with "/" are made relative to the current directory.
-        /// </summary>
-        /// <param name="path">The input path to process (e.g. "/ilitools" or "/cache").</param>
-        /// <returns>An OS-appropriate path as string.</returns>
-        public static string NormalizeUnixStylePath(this string path)
-        {
-            if (string.IsNullOrEmpty(path))
-                return path;
-
-            // If we're on Windows, make it relative to current directory.
-            if (Path.DirectorySeparatorChar != '/' && path.StartsWith('/'))
-            {
-                return Path.Combine(Directory.GetCurrentDirectory(), path.TrimStart('/'));
-            }
-
-            // If the path is already appropriate for the OS, return as-is.
-            return path;
-        }
     }
 }
