@@ -31,7 +31,7 @@ namespace Geowerkstatt.Ilicop.Web
             var configuration = CreateConfiguration();
             var ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT"),
+                InstallationDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT"),
                 CacheDir = Path.Combine(TestContext.DeploymentDirectory, "ARKSHARK"),
                 EnableGpkgValidation = false,
             };

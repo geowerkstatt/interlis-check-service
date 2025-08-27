@@ -45,7 +45,7 @@ namespace Geowerkstatt.Ilicop.Ilitools
         {
             var ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT"),
+                InstallationDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT"),
                 CacheDir = Path.Combine(TestContext.DeploymentDirectory, "ARKSHARK"),
                 EnableGpkgValidation = false,
             };
@@ -95,7 +95,7 @@ namespace Geowerkstatt.Ilicop.Ilitools
         {
             var ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = "PICARESQUEOASIS",
+                InstallationDir = "PICARESQUEOASIS",
                 EnableGpkgValidation = true,
             };
 
@@ -156,7 +156,7 @@ namespace Geowerkstatt.Ilicop.Ilitools
         {
             var ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = "STELLARWITCH",
+                InstallationDir = "STELLARWITCH",
                 EnableGpkgValidation = false,
             };
 
@@ -196,7 +196,7 @@ namespace Geowerkstatt.Ilicop.Ilitools
         {
             var ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = "RAGESLAW",
+                InstallationDir = "RAGESLAW",
             };
 
             var configuration = new ConfigurationBuilder()

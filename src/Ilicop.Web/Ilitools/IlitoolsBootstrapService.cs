@@ -142,7 +142,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         private async Task<string> DownloadAndConfigureIlitoolAsync(string ilitool, string version, CancellationToken cancellationToken)
         {
             // Exit if the tool is already installed and valid
-            var installDir = Path.Combine(ilitoolsEnvironment.HomeDir, ilitool, version);
+            var installDir = Path.Combine(ilitoolsEnvironment.InstallationDir, ilitool, version);
             var jarPath = Path.Combine(installDir, $"{ilitool}-{version}.jar");
             if (Directory.Exists(installDir) && File.Exists(jarPath))
             {
@@ -155,10 +155,10 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             try
             {
                 // Ensure the ilitools home directory exists
-                if (!Directory.Exists(ilitoolsEnvironment.HomeDir))
+                if (!Directory.Exists(ilitoolsEnvironment.InstallationDir))
                 {
-                    Directory.CreateDirectory(ilitoolsEnvironment.HomeDir);
-                    logger.LogDebug("Created ilitools home directory: {IlitoolsHomeDir}", ilitoolsEnvironment.HomeDir);
+                    Directory.CreateDirectory(ilitoolsEnvironment.InstallationDir);
+                    logger.LogDebug("Created ilitools home directory: {IlitoolsHomeDir}", ilitoolsEnvironment.InstallationDir);
                 }
 
                 var downloadUrl = new UriBuilder($"https://downloads.interlis.ch/{ilitool}/{ilitool}-{version}.zip");
@@ -231,7 +231,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         {
             try
             {
-                var toolDir = Path.Combine(ilitoolsEnvironment.HomeDir, ilitool);
+                var toolDir = Path.Combine(ilitoolsEnvironment.InstallationDir, ilitool);
                 if (!Directory.Exists(toolDir))
                 {
                     logger.LogDebug("Tool directory does not exist: {ToolDir}", toolDir);

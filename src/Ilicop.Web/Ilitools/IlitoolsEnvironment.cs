@@ -9,9 +9,9 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
     public class IlitoolsEnvironment
     {
         /// <summary>
-        /// Gets the home directory.
+        /// Gets the installation directory.
         /// </summary>
-        public string HomeDir { get; init; }
+        public string InstallationDir { get; init; }
 
         /// <summary>
         /// Gets the cache directory.
@@ -66,7 +66,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         /// <summary>
         /// Gets the plugins directory.
         /// </summary>
-        public string PluginsDir => Path.Combine(HomeDir, "plugins");
+        public string PluginsDir => Path.Combine(InstallationDir, "plugins");
 
         /// <inheritdoc/>
         public override string ToString()
@@ -75,7 +75,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
     --------------------------------------------------------------------------
     ilitools environment:
-    home directory:                   {{HomeDir ?? "unset"}}
+    home directory:                   {{InstallationDir ?? "unset"}}
     cache directory:                  {{CacheDir ?? "unset"}}
     model repository directory:       {{ModelRepositoryDir ?? "unset"}}
     gpkg validation:                  {{(EnableGpkgValidation ? "enabled" : "disabled")}}

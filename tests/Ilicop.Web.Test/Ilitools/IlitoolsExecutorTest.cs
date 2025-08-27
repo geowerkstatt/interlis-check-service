@@ -26,7 +26,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
             ilitoolsEnvironment = new IlitoolsEnvironment
             {
-                HomeDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT"),
+                InstallationDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT"),
                 CacheDir = Path.Combine(TestContext.DeploymentDirectory, "ARKSHARK"),
                 EnableGpkgValidation = true,
                 IlivalidatorPath = "/path/to/ilivalidator.jar",
