@@ -53,7 +53,6 @@ export const FileDropzone = ({
   const onDropRejected = useCallback(
     (fileRejections) => {
       const errorCode = fileRejections[0].errors[0].code;
-      console.log(fileRejections);
       switch (errorCode) {
         case "file-invalid-type":
           setDropZoneError(
