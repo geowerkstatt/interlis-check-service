@@ -11,20 +11,17 @@ namespace Geowerkstatt.Ilicop.Web.Services;
 /// <inheritdoc cref="IProfileService" />
 public class ProfileService : IProfileService
 {
-    private readonly IlitoolsEnvironment ilitoolsEnvironment;
-    private readonly HttpClient httpClient;
+    private readonly RepositoryReader repositoryReader;
 
-    public ProfileService(IlitoolsEnvironment ilitoolsEnvironment, HttpClient httpClient)
+    public ProfileService(RepositoryReader repositoryReader)
     {
-        this.ilitoolsEnvironment = ilitoolsEnvironment;
-        this.httpClient = httpClient;
+        this.repositoryReader = repositoryReader;
     }
 
     /// <inheritdoc />
     /// <exception cref="RepositoryReaderException">If the profiles could not be loaded from the configured repository.</exception>
     public async Task<List<Profile>> GetProfiles()
     {
-        var repositoryReader = RepositoryReaderFactory.Create(ilitoolsEnvironment.ModelRepositoryDir, httpClient);
         var iliData = await repositoryReader.ReadIliData();
 
         return iliData
