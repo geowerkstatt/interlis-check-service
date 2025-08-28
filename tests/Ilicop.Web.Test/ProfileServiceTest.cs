@@ -7,12 +7,29 @@ using Moq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Geowerkstatt.Ilicop.TestHelpers.ProfileTestHelper;
 
-namespace Geowerkstatt.Ilicop;
+namespace Geowerkstatt.Ilicop.Web;
 
 [TestClass]
 public sealed class ProfileServiceTest
 {
+    private Mock<RepositoryReader> readerMock;
+    private ProfileService service;
+
+    [TestInitialize]
+    public void Initialize()
+    {
+        readerMock = new Mock<RepositoryReader>(MockBehavior.Strict);
+        service = new ProfileService(readerMock.Object);
+    }
+
+    [TestCleanup]
+    public void Cleanup()
+    {
+        readerMock.VerifyAll();
+    }
+
     [TestMethod]
     public async Task GetProfiles()
     {
@@ -25,9 +42,7 @@ public sealed class ProfileServiceTest
         iliData.Add(CreateDatasetMetadata("test-profile-0", [("de", "Testprofil 0"), ("en", "Test profile 0")], ["http://codes.interlis.ch/type/metaconfig"]));
         expectedProfiles.Add(CreateProfile("test-profile-0", [("de", "Testprofil 0"), ("en", "Test profile 0")]));
 
-        var readerMock = new Mock<RepositoryReader>(MockBehavior.Strict);
         readerMock.Setup(x => x.ReadIliData()).ReturnsAsync(iliData);
-        var service = new ProfileService(readerMock.Object);
 
         var actualProfiles = await service.GetProfiles();
 
@@ -60,9 +75,7 @@ public sealed class ProfileServiceTest
         iliData.Add(CreateDatasetMetadata("test-profile-0", [("de", "Testprofil 0"), ("en", "Test profile 0")], ["http://codes.interlis.ch/type/metaconfig"]));
         var profile2 = CreateProfile("test-profile-0", [("de", "Testprofil 0"), ("en", "Test profile 0")]);
 
-        var readerMock = new Mock<RepositoryReader>(MockBehavior.Strict);
         readerMock.Setup(x => x.ReadIliData()).ReturnsAsync(iliData);
-        var service = new ProfileService(readerMock.Object);
 
         var actualProfiles = await service.GetProfiles();
 
@@ -74,9 +87,7 @@ public sealed class ProfileServiceTest
     [TestMethod]
     public async Task GetProfilesThrowsError()
     {
-        var readerMock = new Mock<RepositoryReader>(MockBehavior.Strict);
         readerMock.Setup(x => x.ReadIliData()).ThrowsAsync(new RepositoryReaderException("Could not read ili data"));
-        var service = new ProfileService(readerMock.Object);
 
         await Assert.ThrowsExactlyAsync<RepositoryReaderException>(service.GetProfiles);
     }
@@ -84,9 +95,7 @@ public sealed class ProfileServiceTest
     [TestMethod]
     public async Task GetProfilesEmpty()
     {
-        var readerMock = new Mock<RepositoryReader>(MockBehavior.Strict);
         readerMock.Setup(x => x.ReadIliData()).ReturnsAsync(new List<DatasetMetadata>());
-        var service = new ProfileService(readerMock.Object);
 
         var profiles = await service.GetProfiles();
 
@@ -103,47 +112,11 @@ public sealed class ProfileServiceTest
             CreateDatasetMetadata("not-metaconfig-2", [("de", "Nicht Metaconfig 2"), ("en", "Not Metaconfig 2")]),
         };
 
-        var readerMock = new Mock<RepositoryReader>(MockBehavior.Strict);
         readerMock.Setup(x => x.ReadIliData()).ReturnsAsync(iliData);
-        var service = new ProfileService(readerMock.Object);
 
         var profiles = await service.GetProfiles();
 
         Assert.IsNotNull(profiles);
         Assert.AreEqual(0, profiles.Count);
-    }
-
-    private static DatasetMetadata CreateDatasetMetadata(
-        string id,
-        (string Language, string Text)[] titles,
-        string[] categories = null)
-    {
-        return new DatasetMetadata
-        {
-            id = id,
-            title = new Title
-            {
-                MultilingualText = new MultilingualText
-                {
-                    LocalisedTexts = titles
-                            .Select(t => new Interlis.RepositoryCrawler.XmlModels.LocalisedText { Language = t.Language, Text = t.Text })
-                            .ToArray(),
-                },
-            },
-            categories = categories?.Select(c => new CategoryCodesCode { value = c }).ToArray(),
-        };
-    }
-
-    private static Profile CreateProfile(
-        string id,
-        (string Language, string Text)[] titles)
-    {
-        return new Profile
-        {
-            Id = id,
-            Titles = titles
-                    .Select(t => new Web.Contracts.LocalisedText { Language = t.Language, Text = t.Text })
-                    .ToList(),
-        };
     }
 }
