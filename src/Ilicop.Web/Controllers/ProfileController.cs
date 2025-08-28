@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Geowerkstatt.Ilicop.Web.Controllers
 {
@@ -27,11 +29,24 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         /// <returns>List of profiles.</returns>
         [HttpGet]
         [SwaggerResponse(StatusCodes.Status200OK, "All existing profiles.", typeof(IEnumerable<Profile>), "application/json")]
-        public List<Profile> GetAll()
+        public async Task<IActionResult> GetAll()
         {
             logger.LogTrace("Getting all profiles.");
 
-            return profileService.GetProfiles();
+            try
+            {
+                var profiles = await profileService.GetProfiles();
+                return Ok(profiles);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Could not load profiles from repository.");
+
+                return Problem(
+                    detail: "Error while loading profiles",
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: "Internal Server Error");
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Geowerkstatt.Ilicop.Web.Services
 {
@@ -11,6 +12,6 @@ namespace Geowerkstatt.Ilicop.Web.Services
         /// <summary>
         /// Returns all available profiles.
         /// </summary>
-        List<Profile> GetProfiles();
+        Task<List<Profile>> GetProfiles();
     }
 }

@@ -83,7 +83,7 @@ namespace Geowerkstatt.Ilicop.Web
             services.AddHostedService<IlitoolsBootstrapService>();
             services.AddTransient<IlitoolsExecutor>();
 
-            services.AddScoped<IProfileService, DummyProfileService>();
+            services.AddScoped<IProfileService, ProfileService>();
             services.AddSingleton<IValidatorService, ValidatorService>();
             services.AddHostedService(services => (ValidatorService)services.GetService<IValidatorService>());
             services.AddTransient<IValidator, Validator>();
