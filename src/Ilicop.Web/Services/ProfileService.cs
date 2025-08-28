@@ -1,9 +1,7 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
-using Geowerkstatt.Ilicop.Web.Ilitools;
 using Geowerkstatt.Interlis.RepositoryCrawler;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Geowerkstatt.Ilicop.Web.Services;
