@@ -1,4 +1,4 @@
-﻿import { use } from "react";
+import { use } from "react";
 import { useCallback, useState, useEffect } from "react";
 import { Col, Form, Row } from "react-bootstrap";
 
@@ -59,7 +59,7 @@ export const ProfileDropdown = ({ selectedProfile, onProfileChange, disabled = f
     [onProfileChange]
   );
 
-  if (profiles === undefined || profiles.length === 0) {
+  if (profiles === undefined || profiles.length === 0 || !selectedProfile) {
     return null;
   } else {
     return (
