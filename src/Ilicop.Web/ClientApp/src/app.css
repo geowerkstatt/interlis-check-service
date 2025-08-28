@@ -391,12 +391,12 @@ footer {
 }
 
 
-.modal .btn {
+.btn-outline-dark {
   border-color: rgb(18, 74, 79);
   color: rgb(18, 74, 79);
 }
 
-.modal .btn:hover {
+.btn-outline-dark:hover {
   background-color: rgb(18, 74, 79);
   color: white;
 }

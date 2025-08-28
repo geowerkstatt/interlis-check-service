@@ -52,7 +52,7 @@ export const UploadForm = ({
 
               <Row>
                 <Col className="d-grid">
-                  <Button variant="secondary" onClick={resetForm}>
+                  <Button variant="outline-dark" onClick={resetForm}>
                     Abbrechen
                   </Button>
                 </Col>
