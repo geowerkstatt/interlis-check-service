@@ -17,7 +17,6 @@ public class ProfileService : IProfileService
     }
 
     /// <inheritdoc />
-    /// <exception cref="RepositoryReaderException">If the profiles could not be loaded from the configured repository.</exception>
     public async Task<List<Profile>> GetProfiles()
     {
         var iliData = await repositoryReader.ReadIliData();

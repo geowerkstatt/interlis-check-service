@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Geowerkstatt.Ilicop.Web.Contracts;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -50,49 +51,49 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         [TestMethod]
         public void GetCommonIlitoolsArguments()
         {
-            var request = CreateValidationRequest("/test/path", "test.xtf");
+            var request = CreateValidationRequest("/test/path", "test.xtf", "DEFAULT");
             var args = string.Join(" ", ilitoolsExecutor.GetCommonIlitoolsArguments(request));
 
-            Assert.AreEqual($"--log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\"", args);
+            Assert.AreEqual($"--log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\"", args);
         }
 
         [TestMethod]
         public void CreateIlivalidatorCommand()
         {
-            var request = CreateValidationRequest("/test/path", "test.xtf");
+            var request = CreateValidationRequest("/test/path", "test.xtf", "DEFAULT");
             var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
 
-            var expected = $"java -jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\"";
+            var expected = $"java -jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
         }
 
         [TestMethod]
         public void CreateIlivalidatorCommandWithCatalogueFiles()
         {
-            var request = CreateValidationRequest("/test/path", "test.xtf", additionalCatalogueFilePaths: new List<string> { "additionalTestFile.xml" });
+            var request = CreateValidationRequest("/test/path", "test.xtf", "DEFAULT", additionalCatalogueFilePaths: new List<string> { "additionalTestFile.xml" });
             var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
 
-            var expected = $"java -jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\" \"additionalTestFile.xml\"";
+            var expected = $"java -jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" \"{request.TransferFilePath}\" \"additionalTestFile.xml\"";
             Assert.AreEqual(expected, command);
         }
 
         [TestMethod]
         public void CreateIli2GpkgCommandWithModelNames()
         {
-            var request = CreateValidationRequest("/test/path", "test.gpkg", "Model1;Model2");
+            var request = CreateValidationRequest("/test/path", "test.gpkg", "DEFAULT", "Model1;Model2");
             var command = ilitoolsExecutor.CreateIli2GpkgCommand(request);
 
-            var expected = $"java -jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --models \"Model1;Model2\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --dbfile \"{request.TransferFilePath}\"";
+            var expected = $"java -jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --models \"Model1;Model2\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" --dbfile \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
         }
 
         [TestMethod]
         public void CreateIli2GpkgCommandWithoutModelNames()
         {
-            var request = CreateValidationRequest("/test/path", "test.gpkg");
+            var request = CreateValidationRequest("/test/path", "test.gpkg", "DEFAULT");
             var command = ilitoolsExecutor.CreateIli2GpkgCommand(request);
 
-            var expected = $"java -jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --dbfile \"{request.TransferFilePath}\"";
+            var expected = $"java -jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" --dbfile \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
         }
 
@@ -101,17 +102,17 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         {
             var customConfig = CreateConfiguration("custom {0} wrapper");
             var customExecutor = new IlitoolsExecutor(loggerMock.Object, ilitoolsEnvironment, customConfig);
-            var request = CreateValidationRequest("/test/path", "test.xtf");
+            var request = CreateValidationRequest("/test/path", "test.xtf", "DEFAULT");
             var command = string.Format(CultureInfo.InvariantCulture, "custom {0} wrapper", customExecutor.CreateIlivalidatorCommand(request));
 
-            var expected = $"custom java -jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\" wrapper";
+            var expected = $"custom java -jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" \"{request.TransferFilePath}\" wrapper";
             Assert.AreEqual(expected, command);
         }
 
         [TestMethod]
         public void ExecuteIlivalidatorAsyncFormatsCommandCorrectly()
         {
-            var dummyRequest = CreateValidationRequest("/PEEVEDBAGEL/", "ANT.XTF");
+            var dummyRequest = CreateValidationRequest("/PEEVEDBAGEL/", "ANT.XTF", "DEFAULT");
             var customConfig = CreateConfiguration("dada hopp monkey:latest sh {0}");
             var customExecutor = new IlitoolsExecutor(loggerMock.Object, ilitoolsEnvironment, customConfig);
             var command = customExecutor.CreateIlivalidatorCommand(dummyRequest);
@@ -144,7 +145,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             StringAssert.DoesNotMatch(command, new Regex("--models"));
         }
 
-        private ValidationRequest CreateValidationRequest(string homeDirectory, string transferFile, string modelNames = null, List<string> additionalCatalogueFilePaths = null)
+        private ValidationRequest CreateValidationRequest(string homeDirectory, string transferFile, string profileId, string modelNames = null, List<string> additionalCatalogueFilePaths = null)
         {
             var transferFileNameWithoutExtension = Path.GetFileNameWithoutExtension(transferFile);
             var logPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.log");
@@ -159,6 +160,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 XtfLogFilePath = xtfLogPath,
                 GpkgModelNames = modelNames,
                 AdditionalCatalogueFilePaths = additionalCatalogueFilePaths ?? new List<string>(),
+                Profile = new Profile { Id = profileId },
             };
         }
     }
