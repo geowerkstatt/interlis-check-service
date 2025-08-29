@@ -65,6 +65,9 @@ jobs:
           build-args: |
             VERSION=${{ env.VERSION }}
             REVISION=${{ env.REVISION }}
+          secrets: |
+            github_nuget_user=${{ github.actor }}
+            github_nuget_token=${{ secrets.GITHUB_TOKEN }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           sbom: true

@@ -17,6 +17,9 @@ jobs:
         with:
           dotnet-version: '8.0'
 
+      - name: Add GitHub NuGet Registry
+        run: dotnet nuget add source --username "${{ github.actor }}" --password "%GITHUB_TOKEN%" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/GeoWerkstatt/index.json"
+
       # Run the npm ci command before building
       # the dotnet project, because the project
       # itself calls npm install if the node_modules
@@ -27,6 +30,8 @@ jobs:
 
       - name: Install dependencies
         run: dotnet restore
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build dotnet
         run: dotnet build
