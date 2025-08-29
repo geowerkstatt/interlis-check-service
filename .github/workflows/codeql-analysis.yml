@@ -21,6 +21,9 @@ jobs:
         language: [ 'csharp', 'javascript' ]
 
     steps:
+    - name: Add GitHub NuGet Registry
+      run: dotnet nuget add source --username "${{ github.actor }}" --password "%GITHUB_TOKEN%" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/GeoWerkstatt/index.json"
+
     - name: Checkout repository
       uses: actions/checkout@v5
 
@@ -31,6 +34,8 @@ jobs:
 
     - name: Autobuild
       uses: github/codeql-action/autobuild@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
