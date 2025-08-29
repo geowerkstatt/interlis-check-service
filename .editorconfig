@@ -32,7 +32,7 @@ dotnet_sort_system_directives_first = false
 [*.{xml,config,*proj,nuspec,props,resx,targets,yml,tasks}]
 indent_size = 2
 
-[*.{json,js}]
+[*.{json,js,jsx}]
 indent_size = 2
 
 # license-checker config file

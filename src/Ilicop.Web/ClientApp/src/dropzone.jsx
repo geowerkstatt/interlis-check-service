@@ -1,8 +1,8 @@
-import React, { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { MdCancel, MdFileUpload } from "react-icons/md";
-import { Button, Spinner } from "react-bootstrap";
 import styled from "styled-components";
+import { Spinner } from "react-bootstrap";
 
 const getColor = (props) => {
   if (props.isDragActive) {
@@ -16,10 +16,11 @@ const Container = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   min-height: 15vh;
   max-width: 95vw;
-  font-size: 2rem;
+  font-size: 0.78125rem;
   border-width: 2px;
   border-radius: 5px;
   border-color: ${(props) => getColor(props)};
@@ -30,95 +31,55 @@ const Container = styled.div`
 `;
 
 export const FileDropzone = ({
-  setFileToCheck,
-  setUploadLogsEnabled,
-  fileToCheck,
-  nutzungsbestimmungenAvailable,
-  checkedNutzungsbestimmungen,
-  checkFile,
-  validationRunning,
-  setCheckedNutzungsbestimmungen,
-  showNutzungsbestimmungen,
   acceptedFileTypes,
+  fileToCheck,
   fileToCheckRef,
+  setFileToCheck,
+  validationRunning,
+  resetForm,
 }) => {
-  const [fileAvailable, setFileAvailable] = useState(false);
-  const [dropZoneDefaultText, setDropZoneDefaultText] = useState();
-  const [dropZoneText, setDropZoneText] = useState(dropZoneDefaultText);
-  const [dropZoneTextClass, setDropZoneTextClass] = useState("dropzone dropzone-text-disabled");
-
-  useEffect(
-    () =>
-      setDropZoneDefaultText(
-        `Datei (${acceptedFileTypes}) hier ablegen oder klicken um vom lokalen Dateisystem auszuwählen.`
-      ),
-    [acceptedFileTypes]
-  );
-  useEffect(() => setDropZoneText(dropZoneDefaultText), [dropZoneDefaultText]);
+  const [dropZoneError, setDropZoneError] = useState(undefined);
 
   const onDropAccepted = useCallback(
     (acceptedFiles) => {
-      const updateDropZoneClass = () => {
-        if (!checkFile || (nutzungsbestimmungenAvailable && !checkedNutzungsbestimmungen)) {
-          setDropZoneTextClass("dropzone dropzone-text-disabled");
-        } else {
-          setDropZoneTextClass("dropzone dropzone-text-file");
-        }
-      };
-      updateDropZoneClass();
-      if (acceptedFiles.length === 1) {
-        setDropZoneText(acceptedFiles[0].name);
-        updateDropZoneClass();
-        setFileToCheck(acceptedFiles[0]);
-        fileToCheckRef.current = acceptedFiles[0];
-        setFileAvailable(true);
-      }
+      // dropZone max file is defined as 1;
+      setFileToCheck(acceptedFiles[0]);
+      fileToCheckRef.current = acceptedFiles[0];
+      setDropZoneError(undefined);
     },
-    [checkFile, checkedNutzungsbestimmungen, fileToCheckRef, nutzungsbestimmungenAvailable, setFileToCheck]
+    [fileToCheckRef, setFileToCheck]
   );
-
-  const resetFileToCheck = useCallback(() => {
-    setFileToCheck(null);
-    fileToCheckRef.current = null;
-  }, [fileToCheckRef, setFileToCheck]);
 
   const onDropRejected = useCallback(
     (fileRejections) => {
-      setDropZoneTextClass("dropzone dropzone-text-error");
       const errorCode = fileRejections[0].errors[0].code;
-
       switch (errorCode) {
         case "file-invalid-type":
-          setDropZoneText(
+          setDropZoneError(
             `Der Dateityp wird nicht unterstützt. Bitte wähle eine Datei (max. 200MB) mit einer der folgenden Dateiendungen: ${acceptedFileTypes}`
           );
           break;
         case "too-many-files":
-          setDropZoneText("Es kann nur eine Datei aufs Mal geprüft werden.");
+          setDropZoneError("Es kann nur eine Datei aufs Mal geprüft werden.");
           break;
         case "file-too-large":
-          setDropZoneText(
+          setDropZoneError(
             "Die ausgewählte Datei ist über 200MB gross. Bitte wähle eine kleinere Datei oder erstelle eine ZIP-Datei."
           );
           break;
         default:
-          setDropZoneText(
+          setDropZoneError(
             `Bitte wähle eine Datei (max. 200MB) mit einer der folgenden Dateiendungen: ${acceptedFileTypes}`
           );
       }
-      resetFileToCheck();
-      setFileAvailable(false);
+      resetForm();
     },
-    [resetFileToCheck, acceptedFileTypes]
+    [resetForm, acceptedFileTypes]
   );
 
   const removeFile = (e) => {
     e.stopPropagation();
-    setUploadLogsEnabled(false);
-    resetFileToCheck();
-    setFileAvailable(false);
-    setDropZoneText(dropZoneDefaultText);
-    setDropZoneTextClass("dropzone dropzone-text-disabled");
+    resetForm();
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -131,61 +92,37 @@ export const FileDropzone = ({
 
   return (
     <div className="dropzone-wrapper">
-      <Container className={dropZoneTextClass} {...getRootProps({ isDragActive })}>
+      <Container {...getRootProps({ isDragActive })}>
         <input {...getInputProps()} />
-        <div className={dropZoneTextClass}>
-          {fileAvailable && (
-            <span onClick={removeFile}>
-              <MdCancel className="dropzone-icon" />
-            </span>
-          )}
-          {dropZoneText}
-          {!fileAvailable && (
+        {!(fileToCheck || dropZoneError) && (
+          <div className="dropzone dropzone-text-disabled">
+            Datei {acceptedFileTypes} hier ablegen oder klicken um vom lokalen Dateisystem auszuwählen.
             <p className="drop-icon">
               <MdFileUpload />
             </p>
-          )}
-          {fileToCheck && nutzungsbestimmungenAvailable && (
-            <div onClick={(e) => e.stopPropagation()} className="terms-of-use">
-              <label>
-                <input
-                  type="checkbox"
-                  defaultChecked={checkedNutzungsbestimmungen}
-                  onChange={() => setCheckedNutzungsbestimmungen(!checkedNutzungsbestimmungen)}
-                />
-                <span className="nutzungsbestimmungen-input">
-                  Ich akzeptiere die{" "}
-                  <Button
-                    variant="link"
-                    className="terms-of-use link"
-                    onClick={() => {
-                      showNutzungsbestimmungen();
-                    }}
-                  >
-                    Nutzungsbestimmungen
-                  </Button>
-                  .
-                </span>
-              </label>
-            </div>
-          )}
-          {validationRunning && (
-            <div>
-              <Spinner className="spinner" animation="border" />
-            </div>
-          )}
-          {fileAvailable && (
-            <p className={!nutzungsbestimmungenAvailable && "added-margin"}>
-              <Button
-                className={fileToCheck && !validationRunning ? "check-button" : "invisible-check-button"}
-                onClick={checkFile}
-                disabled={(nutzungsbestimmungenAvailable && !checkedNutzungsbestimmungen) || validationRunning}
-              >
-                Validieren
-              </Button>
+          </div>
+        )}
+        {fileToCheck && (
+          <div className="dropzone dropzone-text-file">
+            <span onClick={removeFile}>
+              <MdCancel className="dropzone-icon" />
+            </span>
+            {fileToCheck.name}
+            {validationRunning && (
+              <div>
+                <Spinner className="spinner" animation="border" />
+              </div>
+            )}
+          </div>
+        )}
+        {dropZoneError && (
+          <div className="dropzone dropzone-text-error">
+            {dropZoneError}
+            <p className="drop-icon">
+              <MdFileUpload />
             </p>
-          )}
-        </div>
+          </div>
+        )}
       </Container>
     </div>
   );

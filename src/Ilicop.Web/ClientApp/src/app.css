@@ -48,7 +48,7 @@ header {
 }
 
 .app-title {
-  font-size: 4rem;
+  font-size: 2.5rem;
   font-weight: 600;
   padding: 30px;
 }
@@ -57,8 +57,7 @@ header {
   color: rgb(18, 74, 79);
   font-weight: 600;
   letter-spacing: 0.05em;
-  font-size: 1.6rem;
-  margin-bottom: 4rem;
+  margin-bottom: 2.5rem;
 }
 
 /************ Protokoll ************/
@@ -68,33 +67,25 @@ header {
   text-align: left;
 }
 
-.protokoll-card {
+.row > .col > .card {
   color: black;
-  margin-top: 30px;
-  max-width: 95vw;
-  min-height: 150px;
-  font-size: 1.6rem;
+  margin-top: 1em;
 }
 
-.status {
-  font-size: 1.6rem;
+.protokoll-card {
+  color: black;
+  min-height: 150px;
 }
+
 
 .card-body {
   text-align: left;
 }
 
 /************ Log ************/
-
-.log-card {
-  max-width: 95vw;
-  margin-top: 16px;
-  margin-bottom: 16px;
-}
-
 .log-entry {
   margin: 0;
-  padding: 0.5rem;
+  padding: 0.3rem;
   display: flex;
 }
 
@@ -119,7 +110,6 @@ header {
 
 .log-entry > .title {
   word-break: break-word;
-  font-size: 1.6rem;
 }
 
 .log-entry-container {
@@ -132,8 +122,8 @@ header {
 .carousel {
   color: rgb(111, 111, 111);
   width: 100%;
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  margin-bottom: 0.625rem;
 }
 
 .carousel-inner {
@@ -177,39 +167,15 @@ input {
 }
 
 .nutzungsbestimmungen-input {
-  font-size: 1.45rem;
-}
-
-.terms-of-use {
-  margin: 8px;
-  margin-left: 35px;
-}
-
-.terms-of-use button {
-  color: rgb(18, 74, 79);
-  text-decoration: none;
-  font-size: 1.45rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  padding: unset;
-  margin: unset;
-  vertical-align: unset;
-}
-
-.terms-of-use button:hover {
-  color: rgb(63, 97, 100);
-}
-
-.terms-of-use input {
-  margin-right: 8px;
+  font-size: 0.90625rem;
 }
 
 .drop-icon {
-  font-size: 3.5rem;
+  font-size: 2.1875rem;
 }
 
 .spinner {
-  margin-top: 1rem;
+  margin-top: 0.625rem;
   align-self: center;
 }
 
@@ -228,13 +194,14 @@ input {
   .title-wrapper {
     margin-top: 12vh;
   }
-  .dropzone {
+  .dropzone-wrapper {
     min-height: 12vh !important;
-    margin-top: 3vh;
-    font-size: 1.6rem;
+  }
+  .dropzone{
+    font-size: 1rem;
   }
   .carousel {
-    font-size: 2rem;
+    font-size: 1.25rem;
   }
   .vendor-logo {
     max-height: 70px;
@@ -250,16 +217,17 @@ input {
   .title-wrapper {
     margin-top: 12vh;
   }
-  .dropzone {
+  .dropzone-wrapper {
     min-height: 12vh !important;
-    margin-top: 3vh;
-    font-size: 1.6rem;
+  }
+  .dropzone {
+    font-size: 1rem;
   }
   .carousel {
-    font-size: 1.8rem;
+    font-size: 1.125rem;
   }
   .vendor-logo {
-    margin-left: 2rem;
+    margin-left: 1.25rem;
     max-height: 50px;
     max-width: 150px;
   }
@@ -272,13 +240,14 @@ input {
   .title-wrapper {
     margin-top: 5vh;
   }
-  .dropzone {
+  .dropzone-wrapper {
     min-height: 10vh !important;
-    margin-top: 1vh;
-    font-size: 1.4rem;
+  }
+  .dropzone {
+    font-size: 0.875rem;
   }
   .carousel {
-    font-size: 1.4rem;
+    font-size: 0.875rem;
   }
   .app-logo {
     max-height: 100px;
@@ -294,15 +263,12 @@ input {
 
 .btn {
   letter-spacing: 0.05em;
-  font-size: 1.6rem;
+  font-size: 1rem;
 }
 
 .check-button {
-  border: none;
   background-color: rgb(18, 74, 79);
   border-color: rgb(18, 74, 79);
-  vertical-align: baseline;
-  margin-top: 1rem;
 }
 
 .check-button:disabled {
@@ -315,21 +281,19 @@ input {
   border-color: rgb(63, 97, 100);
 }
 
-.invisible-check-button {
-  display: none;
-}
-
-.added-margin {
-  margin-top: 2rem;
-}
-
 .download-icon {
-  font-size: 3rem;
+  font-size: 1.9rem;
   margin-left: 10px;
 }
 
 .download-icon :hover {
   color: #555;
+}
+
+/************ Form elements ***********/
+.form-check-input:checked {
+  background-color: rgb(18, 74, 79);
+  border-color: rgb(18, 74, 79);
 }
 
 /************ Check status ************/
@@ -350,7 +314,7 @@ input {
 }
 
 .icon-tooltip .icon-tooltip-text {
-  font-size: 1rem;
+  font-size: 0.624rem;
   visibility: hidden;
   width: 260px;
   background-color: rgb(85, 85, 85);
@@ -397,7 +361,7 @@ footer {
 
 .footer-button.btn-link {
   color: rgb(18, 74, 79);
-  font-size: 1.6rem;
+  font-size: 1rem;
   border: none;
   text-decoration-line: none;
 }
@@ -423,19 +387,16 @@ footer {
 
 .modal-content h3 {
   padding-top: 0.25em;
-  font-size: 1.6rem;
+  font-size: 1rem;
 }
 
-.modal-content p, li, span {
-  font-size: 1.45rem;
-}
 
-.modal .btn {
+.btn-outline-dark {
   border-color: rgb(18, 74, 79);
   color: rgb(18, 74, 79);
 }
 
-.modal .btn:hover {
+.btn-outline-dark:hover {
   background-color: rgb(18, 74, 79);
   color: white;
 }
@@ -479,7 +440,6 @@ footer {
 }
 
 .banner p {
-  font-size: 1.8rem;
   margin-top: 10px;
 }
 

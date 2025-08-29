@@ -231,6 +231,11 @@ Folgenden Komponenten müssen auf dem Entwicklungsrechner installiert sein:
 1. Web-App (React Client und .NET Core Backend) starten:  
    `IIS Express` Launch-Profil im Visual Studio resp. Visual Studio Code mit F5 starten  
 
+1. Vite Development Server für den React Client starten:  
+   Öffne eine weitere Shell im Ordner `./src/Ilicop.Web/ClientApp` und führe aus:  
+   `npm install` (nur beim ersten Mal)  
+   `npm run dev` Um den Vite Development Server zu starten
+
 ## Neue Version erstellen
 
 Ein neuer GitHub *Pre-release* wird bei jeder Änderung auf [main](https://github.com/geowerkstatt/interlis-check-service) [automatisch](./.github/workflows/pre-release.yml) erstellt. In diesem Kontext wird auch ein neues Docker Image mit dem Tag *:edge* erstellt und in die [GitHub Container Registry (ghcr.io)](https://github.com/geowerkstatt/interlis-check-service/pkgs/container/interlis-check-service) gepusht. Der definitve Release erfolgt, indem die Checkbox *This is a pre-release* eines beliebigen Pre-releases entfernt wird. In der Folge wird das entsprechende Docker Image in der ghcr.io Registry mit den Tags (bspw.: *:v1*, *:v1.2.3* und *:latest*) [ergänzt](./.github/workflows/release.yml).
