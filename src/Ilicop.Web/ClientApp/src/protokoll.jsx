@@ -43,7 +43,7 @@ export const Protokoll = (props) => {
   return (
     <Container>
       {log.length > 0 && (
-        <Row class="g-5">
+        <Row className="g-5">
           <Col>
             <Card className="protokoll-card">
               <Card.Body>
