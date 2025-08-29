@@ -1,4 +1,5 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
+using Geowerkstatt.Ilicop.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +26,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         private Mock<ApiVersion> apiVersionMock;
         private Mock<IFormFile> formFileMock;
         private Mock<IValidatorService> validatorServiceMock;
+        private Mock<IProfileService> profileServiceMock;
         private UploadController controller;
 
         public TestContext TestContext { get; set; }
@@ -37,6 +39,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             validatorMock = new Mock<IValidator>(MockBehavior.Strict);
             fileProviderMock = new Mock<PhysicalFileProvider>(MockBehavior.Strict, CreateConfiguration(), "ILICOP_UPLOADS_DIR");
             validatorServiceMock = new Mock<IValidatorService>(MockBehavior.Strict);
+            profileServiceMock = new Mock<IProfileService>(MockBehavior.Strict);
             formFileMock = new Mock<IFormFile>(MockBehavior.Strict);
             apiVersionMock = new Mock<ApiVersion>(MockBehavior.Strict, 9, 88);
 
@@ -48,7 +51,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                 httpContextAccessorMock.Object,
                 validatorMock.Object,
                 fileProviderMock.Object,
-                validatorServiceMock.Object);
+                validatorServiceMock.Object,
+                profileServiceMock.Object);
         }
 
         [TestCleanup]
@@ -60,6 +64,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             fileProviderMock.VerifyAll();
             formFileMock.VerifyAll();
             validatorServiceMock.VerifyAll();
+            profileServiceMock.VerifyAll();
             apiVersionMock.VerifyAll();
 
             controller.Dispose();
@@ -76,6 +81,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             validatorServiceMock.Setup(x => x.EnqueueJobAsync(
                 It.Is<Guid>(x => x.Equals(new Guid(jobId))),
                 It.IsAny<Func<CancellationToken, Task>>())).Returns(Task.FromResult(0));
+            profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "DEFAULT" } });
 
             var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object) as CreatedResult;
 
@@ -104,6 +110,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             httpContext.Request.ContentLength = 1234;
             httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
             formFileMock.SetupGet(x => x.FileName).Returns("SPATULASET.cmd");
+            profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "DEFAULT" } });
 
             var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object) as ObjectResult;
 
