@@ -20,9 +20,18 @@ RUN apt-get update && \
     apt-get install nodejs -y && \
     rm -rf /var/lib/apt/lists/*
 
+# Register GeoWerkstatt nuget package registry as a NuGet source
+RUN dotnet nuget add source "https://nuget.pkg.github.com/GeoWerkstatt/index.json" \
+    --name "github" \
+    --username "%GITHUB_NUGET_USER%" \
+    --password "%GITHUB_NUGET_TOKEN%" \
+    --store-password-in-clear-text
+
 # Restore dependencies and tools
 COPY ["src/Ilicop.Web/Ilicop.Web.csproj", "Ilicop.Web/"]
-RUN dotnet restore "Ilicop.Web/Ilicop.Web.csproj"
+RUN --mount=type=secret,id=github_nuget_user,env=GITHUB_NUGET_USER \
+    --mount=type=secret,id=github_nuget_token,env=GITHUB_NUGET_TOKEN \
+    dotnet restore "Ilicop.Web/Ilicop.Web.csproj"
 
 # Create optimized production build
 COPY ["src/Ilicop.Web/", "Ilicop.Web/"]

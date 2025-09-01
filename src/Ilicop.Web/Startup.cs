@@ -1,5 +1,6 @@
 ﻿using Geowerkstatt.Ilicop.Web.Ilitools;
 using Geowerkstatt.Ilicop.Web.Services;
+using Geowerkstatt.Interlis.RepositoryCrawler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +17,7 @@ using Microsoft.OpenApi.Models;
 using NetTopologySuite.IO.Converters;
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -79,11 +81,18 @@ namespace Geowerkstatt.Ilicop.Web
                 };
             });
 
+            services.AddScoped(sp =>
+            {
+                var env = sp.GetRequiredService<IlitoolsEnvironment>();
+                var httpClient = sp.GetRequiredService<HttpClient>();
+                return RepositoryReaderFactory.Create(env.ModelRepositoryDir, httpClient);
+            });
+
             services.AddHttpClient();
             services.AddHostedService<IlitoolsBootstrapService>();
             services.AddTransient<IlitoolsExecutor>();
 
-            services.AddScoped<IProfileService, DummyProfileService>();
+            services.AddScoped<IProfileService, ProfileService>();
             services.AddSingleton<IValidatorService, ValidatorService>();
             services.AddHostedService(services => (ValidatorService)services.GetService<IValidatorService>());
             services.AddTransient<IValidator, Validator>();

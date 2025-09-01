@@ -7,6 +7,10 @@
 *.userosscache
 *.sln.docstates
 
+# Docker-Compose secret files
+github_nuget_user.txt
+github_nuget_token.txt
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
