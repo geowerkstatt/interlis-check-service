@@ -95,7 +95,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         [SwaggerResponse(StatusCodes.Status413PayloadTooLarge, "The transfer file is too large. Max allowed request body size is 200 MB.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1629:DocumentationTextMustEndWithAPeriod", Justification = "Not applicable for code examples.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1028:CodeMustNotContainTrailingWhitespace", Justification = "Not applicable for code examples.")]
-        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file, [FromForm] string profileId = "DEFAULT")
+        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file, [FromForm] string profileId)
         {
             if (file == null) return Problem($"Form data <{nameof(file)}> cannot be empty.", statusCode: StatusCodes.Status400BadRequest);
 
@@ -115,6 +115,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             try
             {
+                if (profileId == null) profileId = "DEFAULT";
+
                 // Check if validation profile exists
                 var profiles = await profileService.GetProfiles();
                 var profile = profiles.First(p => p.Id.Equals(profileId, StringComparison.OrdinalIgnoreCase));
@@ -161,7 +163,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             {
                 if (profileId == "DEFAULT")
                 {
-                    logger.LogInformation("");
+                    logger.LogInformation("There is no default profile. A valid profile must be explicitly specified.");
                     return Problem("There is no default profile. A valid profile must be explicitly specified.", statusCode: StatusCodes.Status400BadRequest);
                 }
                 else
