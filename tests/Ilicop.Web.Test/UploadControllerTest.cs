@@ -95,7 +95,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         }
 
         [TestMethod]
-        public async Task UploadAsyncWithProfileNullAndWithDefaultProfileExisting()
+        public async Task UploadAsyncWithProfileUnspecifiedAndWithDefaultProfileExisting()
         {
             var httpContext = new DefaultHttpContext();
             httpContext.Request.ContentLength = 1234;
@@ -107,7 +107,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                 It.IsAny<Func<CancellationToken, Task>>())).Returns(Task.FromResult(0));
             profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "DEFAULT" } });
 
-            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, null) as CreatedResult;
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object) as CreatedResult;
 
             Assert.IsInstanceOfType(response, typeof(CreatedResult));
             Assert.IsInstanceOfType(response.Value, typeof(UploadResponse));
@@ -115,7 +115,48 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         }
 
         [TestMethod]
-        public async Task UploadAsyncWithProfileNullAndWithDefaultProfileNotExisting()
+        public async Task UploadAsyncWithProfileNull()
+        {
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.ContentLength = 1234;
+            httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+            formFileMock.SetupGet(x => x.FileName).Returns("BIZARRESCAN.xtf");
+            profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(
+                new List<Profile>
+                {
+                    new Profile { Id = "DEFAULT" },
+                    new Profile { Id = "test-profile" },
+                });
+
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, null) as ObjectResult;
+            var problemDetails = response?.Value as ProblemDetails;
+
+            Assert.IsInstanceOfType(response, typeof(ObjectResult));
+            Assert.IsInstanceOfType(problemDetails, typeof(ProblemDetails));
+            Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);
+            Assert.AreEqual("The specified profile <> does not exist.", problemDetails.Detail);
+        }
+
+        [TestMethod]
+        public async Task UploadAsyncProfileIsCaseSensitive()
+        {
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.ContentLength = 1234;
+            httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+            formFileMock.SetupGet(x => x.FileName).Returns("BIZARRESCAN.xtf");
+            profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "Capitalized-Profile-ID" } });
+
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, "capitalized-profile-id") as ObjectResult;
+            var problemDetails = response?.Value as ProblemDetails;
+
+            Assert.IsInstanceOfType(response, typeof(ObjectResult));
+            Assert.IsInstanceOfType(problemDetails, typeof(ProblemDetails));
+            Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);
+            Assert.AreEqual("The specified profile <capitalized-profile-id> does not exist.", problemDetails.Detail);
+        }
+
+        [TestMethod]
+        public async Task UploadAsyncWithProfileUnspecifiedAndWithDefaultProfileNotExisting()
         {
             var httpContext = new DefaultHttpContext();
             httpContext.Request.ContentLength = 1234;
@@ -123,7 +164,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             formFileMock.SetupGet(x => x.FileName).Returns("BIZARRESCAN.xtf");
             profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "test-profile" } });
 
-            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, null) as ObjectResult;
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object) as ObjectResult;
             var problemDetails = response?.Value as ProblemDetails;
 
             Assert.IsInstanceOfType(response, typeof(ObjectResult));
@@ -187,7 +228,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             formFileMock.SetupGet(x => x.FileName).Returns("BIZARRESCAN.xtf");
             profileServiceMock.Setup(x => x.GetProfiles()).ThrowsAsync(new RepositoryReaderException());
 
-            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, "DEFAULT") as ObjectResult;
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object) as ObjectResult;
             var problemDetails = response?.Value as ProblemDetails;
 
             Assert.IsInstanceOfType(response, typeof(ObjectResult));
@@ -199,7 +240,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         [TestMethod]
         public async Task UploadAsyncForFileNull()
         {
-            var response = await controller.UploadAsync(apiVersionMock.Object, null, null) as ObjectResult;
+            var response = await controller.UploadAsync(apiVersionMock.Object, null) as ObjectResult;
 
             Assert.IsInstanceOfType(response, typeof(ObjectResult));
             Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);
@@ -215,7 +256,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             formFileMock.SetupGet(x => x.FileName).Returns("SPATULASET.cmd");
             profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "DEFAULT" } });
 
-            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, null) as ObjectResult;
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object) as ObjectResult;
 
             Assert.IsInstanceOfType(response, typeof(ObjectResult));
             Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);

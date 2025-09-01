@@ -22,6 +22,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     public class UploadController : Controller
     {
+        private const string DefaultProfileId = "DEFAULT";
+
         private readonly ILogger<UploadController> logger;
         private readonly IConfiguration configuration;
         private readonly IHttpContextAccessor httpContextAccessor;
@@ -95,7 +97,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         [SwaggerResponse(StatusCodes.Status413PayloadTooLarge, "The transfer file is too large. Max allowed request body size is 200 MB.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1629:DocumentationTextMustEndWithAPeriod", Justification = "Not applicable for code examples.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1028:CodeMustNotContainTrailingWhitespace", Justification = "Not applicable for code examples.")]
-        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file, [FromForm] string profileId)
+        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file, [FromForm] string profileId = DefaultProfileId)
         {
             if (file == null) return Problem($"Form data <{nameof(file)}> cannot be empty.", statusCode: StatusCodes.Status400BadRequest);
 
@@ -115,11 +117,9 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             try
             {
-                if (profileId == null) profileId = "DEFAULT";
-
                 // Check if validation profile exists
                 var profiles = await profileService.GetProfiles();
-                var profile = profiles.First(p => p.Id.Equals(profileId, StringComparison.OrdinalIgnoreCase));
+                var profile = profiles.First(p => p.Id == profileId);
 
                 // Sanitize file name and save the file to the predefined home directory.
                 var transferFile = Path.ChangeExtension(
@@ -161,7 +161,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             }
             catch (InvalidOperationException)
             {
-                if (profileId == "DEFAULT")
+                if (profileId == DefaultProfileId)
                 {
                     logger.LogInformation("There is no default profile. A valid profile must be explicitly specified.");
                     return Problem("There is no default profile. A valid profile must be explicitly specified.", statusCode: StatusCodes.Status400BadRequest);
