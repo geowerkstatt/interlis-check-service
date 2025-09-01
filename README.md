@@ -26,7 +26,7 @@ Für die Authentifizierung gegenüber des NuGet Repositories von [GeoW.Interlis.
 - `github_nuget_user.txt`: GitHub Benutzername als einziger Inhalt
 - `github_nuget_token.txt`: [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic) mit mindestens `read:packages` Berechtigung als einziger Inhalt
 
-Danach kann die Umgebung mit `docker-compose up` hochgefahren werden.
+Danach kann die Umgebung mit `docker compose up` hochgefahren werden.
 
 Um einen ersten Augenschein der Applikation zu nehmen, kann der Container in der Kommandozeile wie folgt gestartet werden:
 
