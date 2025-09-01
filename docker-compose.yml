@@ -1,3 +1,4 @@
+# Add secrets for username and token for authentication to GeoW.Interlis.Tools NuGet feed
 secrets:
   github_nuget_user:
     file: ./github_nuget_user.txt

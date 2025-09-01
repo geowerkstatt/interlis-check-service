@@ -21,7 +21,12 @@ Webbasierter Checkservice für INTERLIS Datenabgaben
 
 ## Quick Start
 
-Mit [Docker](https://www.docker.com/) kann der *INTERLIS Web-Check-Service* in einer isolierten Umgebung mit Docker Containern betrieben werden. Eine Beispiel-Konfiguration (`docker-compose.yml`) befindet sich im nächsten Abschnitt. Mit `docker-compose up` wird die Umgebung hochgefahren.
+Mit [Docker](https://www.docker.com/) kann der *INTERLIS Web-Check-Service* in einer isolierten Umgebung mit Docker Containern betrieben werden. Eine Beispiel-Konfiguration (`docker-compose.yml`) befindet sich im nächsten Abschnitt. 
+Für die Authentifizierung gegenüber des NuGet Repositories von [GeoW.Interlis.Tools](https://github.com/geowerkstatt/GeoW.Interlis.Tools) müssen für Docker-Compose die folgende zwei TXT-Dateien im gleichen Verzeichnis wie das `docker-compose.yml` erstellt werden:
+- `github_nuget_user.txt`: GitHub Benutzername als einziger Inhalt
+- `github_nuget_token.txt`: [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic) mit mindestens `read:packages` Berechtigung als einziger Inhalt
+
+Danach kann die Umgebung mit `docker-compose up` hochgefahren werden.
 
 Um einen ersten Augenschein der Applikation zu nehmen, kann der Container in der Kommandozeile wie folgt gestartet werden:
 
@@ -227,6 +232,9 @@ Folgenden Komponenten müssen auf dem Entwicklungsrechner installiert sein:
 1. Git Repository klonen:  
    Öffne Git Shell und navigiere in den lokalen Projekt Root  
    `git clone https://github.com/geowerkstatt/interlis-check-service.git`
+
+1. Das NuGet Repository von GeoW.Interlis.Tools hinzufügen:  
+   Dafür ein `nuget.config` erstellen, wie es in der [README der GeoW.Interlis.Tools](https://github.com/geowerkstatt/GeoW.Interlis.Tools?tab=readme-ov-file#github-nuget-feed) beschrieben ist. 
 
 1. Web-App (React Client und .NET Core Backend) starten:  
    `IIS Express` Launch-Profil im Visual Studio resp. Visual Studio Code mit F5 starten  
