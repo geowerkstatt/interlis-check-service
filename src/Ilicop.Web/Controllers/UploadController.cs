@@ -1,4 +1,6 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
+using Geowerkstatt.Ilicop.Web.Services;
+using Geowerkstatt.Interlis.RepositoryCrawler;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -8,6 +10,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using UAParser;
@@ -19,14 +22,24 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     public class UploadController : Controller
     {
+        private const string DefaultProfileId = "DEFAULT";
+
         private readonly ILogger<UploadController> logger;
         private readonly IConfiguration configuration;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IValidator validator;
         private readonly IFileProvider fileProvider;
         private readonly IValidatorService validatorService;
+        private readonly IProfileService profileService;
 
-        public UploadController(ILogger<UploadController> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IValidator validator, IFileProvider fileProvider, IValidatorService validatorService)
+        public UploadController(
+            ILogger<UploadController> logger,
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor,
+            IValidator validator,
+            IFileProvider fileProvider,
+            IValidatorService validatorService,
+            IProfileService profileService)
         {
             this.logger = logger;
             this.configuration = configuration;
@@ -34,6 +47,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             this.validator = validator;
             this.fileProvider = fileProvider;
             this.validatorService = validatorService;
+            this.profileService = profileService;
 
             this.fileProvider.Initialize(validator.Id);
         }
@@ -43,6 +57,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         /// </summary>
         /// <param name="version">The application programming interface (API) version.</param>
         /// <param name="file">The transfer or ZIP file to validate.</param>
+        /// <param name="profileId">The ID of the validation profile to be used for validation. Defaults to "DEFAULT".</param>
         /// <remarks>
         /// ## Usage
         /// 
@@ -82,7 +97,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         [SwaggerResponse(StatusCodes.Status413PayloadTooLarge, "The transfer file is too large. Max allowed request body size is 200 MB.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1629:DocumentationTextMustEndWithAPeriod", Justification = "Not applicable for code examples.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1028:CodeMustNotContainTrailingWhitespace", Justification = "Not applicable for code examples.")]
-        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file)
+        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file, [FromForm] string profileId = DefaultProfileId)
         {
             if (file == null) return Problem($"Form data <{nameof(file)}> cannot be empty.", statusCode: StatusCodes.Status400BadRequest);
 
@@ -102,6 +117,10 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             try
             {
+                // Check if validation profile exists
+                var profiles = await profileService.GetProfiles();
+                var profile = profiles.First(p => p.Id == profileId);
+
                 // Sanitize file name and save the file to the predefined home directory.
                 var transferFile = Path.ChangeExtension(
                     Path.GetRandomFileName(),
@@ -120,7 +139,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
                 // Add validation job to queue.
                 await validatorService.EnqueueJobAsync(
-                    validator.Id, cancellationToken => validator.ExecuteAsync(transferFile, cancellationToken));
+                    validator.Id, cancellationToken => validator.ExecuteAsync(transferFile, profile, cancellationToken));
 
                 logger.LogInformation("Job with id <{JobId}> is scheduled for execution.", validator.Id);
 
@@ -134,6 +153,23 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             {
                 logger.LogInformation(ex.Message);
                 return Problem(ex.Message, statusCode: 400);
+            }
+            catch (RepositoryReaderException ex)
+            {
+                logger.LogError(ex, "Error retrieving profiles.");
+                return Problem("Error retrieving profiles.", statusCode: StatusCodes.Status500InternalServerError);
+            }
+            catch (InvalidOperationException)
+            {
+                if (profileId == DefaultProfileId)
+                {
+                    logger.LogInformation("There is no default profile. A valid profile must be explicitly specified.");
+                    return Problem("There is no default profile. A valid profile must be explicitly specified.", statusCode: StatusCodes.Status400BadRequest);
+                }
+                else
+                {
+                    return Problem($"The specified profile <{profileId}> does not exist.", statusCode: StatusCodes.Status400BadRequest);
+                }
             }
         }
     }

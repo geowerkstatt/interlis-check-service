@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Geowerkstatt.Ilicop.Web.Contracts;
+using System;
 using System.Collections.Generic;
 
 namespace Geowerkstatt.Ilicop.Web
@@ -17,6 +18,11 @@ namespace Geowerkstatt.Ilicop.Web
         /// Gets or sets the full path to the transfer file.
         /// </summary>
         public required string TransferFilePath { get; init; }
+
+        /// <summary>
+        /// Gets or sets the validation profile to use.
+        /// </summary>
+        public required Profile Profile { get; init; }
 
         /// <summary>
         /// Gets or sets the path to the log file.

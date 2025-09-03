@@ -210,6 +210,9 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
             // Add model directory
             yield return $"--modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\"";
+
+            // Add profile
+            yield return $"--metaConfig \"ilidata:{request.Profile.Id}\"";
         }
 
         /// <summary>

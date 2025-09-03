@@ -55,7 +55,7 @@ namespace Geowerkstatt.Ilicop.Web
         }
 
         /// <inheritdoc/>
-        public async Task ExecuteAsync(string transferFile, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(string transferFile, Profile profile, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNullOrWhiteSpace(transferFile);
             if (!fileProvider.Exists(transferFile)) throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Transfer file with the specified name <{0}> not found in <{1}>.", transferFile, fileProvider.HomeDirectory));
@@ -82,7 +82,7 @@ namespace Geowerkstatt.Ilicop.Web
             try
             {
                 // Execute validation
-                await ValidateAsync(transferFile, cancellationToken).ConfigureAwait(false);
+                await ValidateAsync(transferFile, profile, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -193,7 +193,7 @@ namespace Geowerkstatt.Ilicop.Web
         /// <summary>
         /// Asynchronously validates the <paramref name="transferFile"/>> with ilivalidator/ili2gpkg.
         /// </summary>
-        private async Task ValidateAsync(string transferFile, CancellationToken cancellationToken)
+        private async Task ValidateAsync(string transferFile, Profile profile, CancellationToken cancellationToken)
         {
             logger.LogInformation("Validating transfer file <{TransferFile}> with ilivalidator/ili2gpkg", transferFile);
 
@@ -215,6 +215,7 @@ namespace Geowerkstatt.Ilicop.Web
                 XtfLogFilePath = xtfLogPath,
                 GpkgModelNames = GpkgModelNames,
                 AdditionalCatalogueFilePaths = xmlCatalogFiles,
+                Profile = profile,
             };
 
             var exitCode = await ilitoolsExecutor.ValidateAsync(request, cancellationToken).ConfigureAwait(false);
