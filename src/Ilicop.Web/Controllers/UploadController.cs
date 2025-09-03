@@ -57,7 +57,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         /// </summary>
         /// <param name="version">The application programming interface (API) version.</param>
         /// <param name="file">The transfer or ZIP file to validate.</param>
-        /// <param name="profileId">The ID of the validation profile to be used for validation. Defaults to "DEFAULT".</param>
+        /// <param name="profileId">The ID of the validation profile to be used for validation. Null and empty string default to "DEFAULT".</param>
         /// <remarks>
         /// ## Usage
         /// 
@@ -97,7 +97,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         [SwaggerResponse(StatusCodes.Status413PayloadTooLarge, "The transfer file is too large. Max allowed request body size is 200 MB.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1629:DocumentationTextMustEndWithAPeriod", Justification = "Not applicable for code examples.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1028:CodeMustNotContainTrailingWhitespace", Justification = "Not applicable for code examples.")]
-        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file, [FromForm] string profileId = DefaultProfileId)
+        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file, [FromForm] string profileId)
         {
             if (file == null) return Problem($"Form data <{nameof(file)}> cannot be empty.", statusCode: StatusCodes.Status400BadRequest);
 
@@ -117,6 +117,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             try
             {
+                if (string.IsNullOrEmpty(profileId)) profileId = DefaultProfileId;
+
                 // Check if validation profile exists
                 var profiles = await profileService.GetProfiles();
                 var profile = profiles.First(p => p.Id == profileId);
