@@ -95,7 +95,9 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         }
 
         [TestMethod]
-        public async Task UploadAsyncWithEmptyStringAsProfileAndWithDefaultProfileExisting()
+        [DataRow(null)]
+        [DataRow("")]
+        public async Task UploadAsyncWithoutExplicitProfile(string profileId)
         {
             var httpContext = new DefaultHttpContext();
             httpContext.Request.ContentLength = 1234;
@@ -107,7 +109,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                 It.IsAny<Func<CancellationToken, Task>>())).Returns(Task.FromResult(0));
             profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "DEFAULT" } });
 
-            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, "") as CreatedResult;
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, profileId) as CreatedResult;
 
             Assert.IsInstanceOfType(response, typeof(CreatedResult));
             Assert.IsInstanceOfType(response.Value, typeof(UploadResponse));
@@ -115,7 +117,10 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         }
 
         [TestMethod]
-        public async Task UploadAsyncWithEmptyStringAsProfileAndWithDefaultProfileNotExisting()
+        [DataRow("")]
+        [DataRow(null)]
+        [DataRow("DEFAULT")]
+        public async Task DefaultValidationWithoutDefaultProfileReturnsBadRequest(string profileId)
         {
             var httpContext = new DefaultHttpContext();
             httpContext.Request.ContentLength = 1234;
@@ -123,33 +128,13 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             formFileMock.SetupGet(x => x.FileName).Returns("BIZARRESCAN.xtf");
             profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "test-profile" } });
 
-            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, "") as ObjectResult;
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, profileId) as ObjectResult;
             var problemDetails = response?.Value as ProblemDetails;
 
             Assert.IsInstanceOfType(response, typeof(ObjectResult));
             Assert.IsInstanceOfType(problemDetails, typeof(ProblemDetails));
             Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);
             Assert.AreEqual("There is no default profile. A valid profile must be explicitly specified.", problemDetails.Detail);
-        }
-
-        [TestMethod]
-        public async Task UploadAsyncWithProfileNull()
-        {
-            var httpContext = new DefaultHttpContext();
-            httpContext.Request.ContentLength = 1234;
-            httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
-            formFileMock.SetupGet(x => x.FileName).Returns("BIZARRESCAN.xtf");
-            formFileMock.Setup(x => x.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(0));
-            validatorServiceMock.Setup(x => x.EnqueueJobAsync(
-                It.Is<Guid>(x => x.Equals(new Guid(jobId))),
-                It.IsAny<Func<CancellationToken, Task>>())).Returns(Task.FromResult(0));
-            profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "DEFAULT" } });
-
-            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, null) as CreatedResult;
-
-            Assert.IsInstanceOfType(response, typeof(CreatedResult));
-            Assert.IsInstanceOfType(response.Value, typeof(UploadResponse));
-            Assert.AreEqual(StatusCodes.Status201Created, response.StatusCode);
         }
 
         [TestMethod]
@@ -212,7 +197,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         }
 
         [TestMethod]
-        public async Task UploadAsyncForFileNull()
+        public async Task UploadAsyncForFileNullProducesBadRequest()
         {
             var response = await controller.UploadAsync(apiVersionMock.Object, null, null) as ObjectResult;
 
