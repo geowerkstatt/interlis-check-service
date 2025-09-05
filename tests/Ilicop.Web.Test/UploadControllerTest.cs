@@ -97,7 +97,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         [TestMethod]
         [DataRow(null)]
         [DataRow("")]
-        public async Task UploadAsyncWithoutExplicitProfile(string profileId)
+        public async Task UploadAsyncWithoutExplicitProfile(string profile)
         {
             var httpContext = new DefaultHttpContext();
             httpContext.Request.ContentLength = 1234;
@@ -109,7 +109,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                 It.IsAny<Func<CancellationToken, Task>>())).Returns(Task.FromResult(0));
             profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "DEFAULT" } });
 
-            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, profileId) as CreatedResult;
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, profile) as CreatedResult;
 
             Assert.IsInstanceOfType(response, typeof(CreatedResult));
             Assert.IsInstanceOfType(response.Value, typeof(UploadResponse));
@@ -120,7 +120,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         [DataRow("")]
         [DataRow(null)]
         [DataRow("DEFAULT")]
-        public async Task DefaultValidationWithoutDefaultProfileReturnsBadRequest(string profileId)
+        public async Task DefaultValidationWithoutDefaultProfileReturnsBadRequest(string profile)
         {
             var httpContext = new DefaultHttpContext();
             httpContext.Request.ContentLength = 1234;
@@ -128,7 +128,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             formFileMock.SetupGet(x => x.FileName).Returns("BIZARRESCAN.xtf");
             profileServiceMock.Setup(x => x.GetProfiles()).ReturnsAsync(new List<Profile> { new Profile { Id = "test-profile" } });
 
-            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, profileId) as ObjectResult;
+            var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, profile) as ObjectResult;
             var problemDetails = response?.Value as ProblemDetails;
 
             Assert.IsInstanceOfType(response, typeof(ObjectResult));

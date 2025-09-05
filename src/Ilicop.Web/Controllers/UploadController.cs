@@ -22,7 +22,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     public class UploadController : Controller
     {
-        private const string DefaultProfileId = "DEFAULT";
+        private const string DefaultProfile = "DEFAULT";
 
         private readonly ILogger<UploadController> logger;
         private readonly IConfiguration configuration;
@@ -57,7 +57,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         /// </summary>
         /// <param name="version">The application programming interface (API) version.</param>
         /// <param name="file">The transfer or ZIP file to validate.</param>
-        /// <param name="profileId">The ID of the validation profile to be used for validation. Null and empty string default to "DEFAULT".</param>
+        /// <param name="profile">The ID of the validation profile to be used for validation. Null and empty string default to "DEFAULT".</param>
         /// <remarks>
         /// ## Usage
         /// 
@@ -97,7 +97,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         [SwaggerResponse(StatusCodes.Status413PayloadTooLarge, "The transfer file is too large. Max allowed request body size is 200 MB.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1629:DocumentationTextMustEndWithAPeriod", Justification = "Not applicable for code examples.")]
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1028:CodeMustNotContainTrailingWhitespace", Justification = "Not applicable for code examples.")]
-        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file, [FromForm] string profileId)
+        public async Task<IActionResult> UploadAsync(ApiVersion version, IFormFile file, [FromForm] string profile)
         {
             if (file == null) return Problem($"Form data <{nameof(file)}> cannot be empty.", statusCode: StatusCodes.Status400BadRequest);
 
@@ -117,11 +117,11 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             try
             {
-                if (string.IsNullOrEmpty(profileId)) profileId = DefaultProfileId;
+                if (string.IsNullOrEmpty(profile)) profile = DefaultProfile;
 
                 // Check if validation profile exists
                 var profiles = await profileService.GetProfiles();
-                var profile = profiles.First(p => p.Id == profileId);
+                var foundProfile = profiles.First(p => p.Id == profile);
 
                 // Sanitize file name and save the file to the predefined home directory.
                 var transferFile = Path.ChangeExtension(
@@ -141,7 +141,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
                 // Add validation job to queue.
                 await validatorService.EnqueueJobAsync(
-                    validator.Id, cancellationToken => validator.ExecuteAsync(transferFile, profile, cancellationToken));
+                    validator.Id, cancellationToken => validator.ExecuteAsync(transferFile, foundProfile, cancellationToken));
 
                 logger.LogInformation("Job with id <{JobId}> is scheduled for execution.", validator.Id);
 
@@ -163,14 +163,14 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             }
             catch (InvalidOperationException)
             {
-                if (profileId == DefaultProfileId)
+                if (profile == DefaultProfile)
                 {
                     logger.LogInformation("There is no default profile. A valid profile must be explicitly specified.");
                     return Problem("There is no default profile. A valid profile must be explicitly specified.", statusCode: StatusCodes.Status400BadRequest);
                 }
                 else
                 {
-                    return Problem($"The specified profile <{profileId}> does not exist.", statusCode: StatusCodes.Status400BadRequest);
+                    return Problem($"The specified profile <{profile}> does not exist.", statusCode: StatusCodes.Status400BadRequest);
                 }
             }
         }
