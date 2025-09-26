@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## v5.0.185 - 2025-09-26
+
 ### Changed
 
 - Added local INTERLIS model repository for configuration purposes. Removed legacy configuration support for catalogues, configs and custom model directories.
