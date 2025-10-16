@@ -1,29 +1,12 @@
 {
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:25568",
-      "sslPort": 44302
-    }
-  },
-  "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ILICOP_UPLOADS_DIR": "Uploads",
-        "ILITOOLS_MODEL_REPOSITORY_DIR": "../../data/repositories/default"
-      }
-    },
     "Ilicop.Web": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ILICOP_UPLOADS_DIR": "Uploads",
-        "ILITOOLS_MODEL_REPOSITORY_DIR": "../../data/repositories/default"
+        "ILITOOLS_MODEL_REPOSITORY_DIR": "../../data/repositories/default",
+        "ENABLE_GPKG_VALIDATION": "true"
       },
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     }
