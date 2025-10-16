@@ -129,6 +129,9 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 }
             }
 
+            // Add csv log if enabled
+            args.Add($"--csvlog \"{request.CsvLogFilePath}\"");
+
             args.AddRange(GetCommonIlitoolsArguments(request));
 
             // Add transfer file path (without specific parameter name)

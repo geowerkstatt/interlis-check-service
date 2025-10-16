@@ -47,6 +47,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             }
 
             var xtfLogUrl = GetLogDownloadUrl(version, jobId, LogType.Xtf);
+            var csvLogUrl = GetLogDownloadUrl(version, jobId, LogType.Csv);
             return Ok(new StatusResponse
             {
                 JobId = jobId,
@@ -54,6 +55,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                 StatusMessage = job.StatusMessage,
                 LogUrl = GetLogDownloadUrl(version, jobId, LogType.Log),
                 XtfLogUrl = xtfLogUrl,
+                CsvLogUrl = csvLogUrl,
                 JsonLogUrl = xtfLogUrl == null ? null : GetJsonLogUrl(version, jobId), // JSON is generated from the XTF log file
                 GeoJsonLogUrl = GetLogDownloadUrl(version, jobId, LogType.GeoJson),
             });

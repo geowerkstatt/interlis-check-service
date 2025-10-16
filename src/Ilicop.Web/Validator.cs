@@ -201,6 +201,7 @@ namespace Geowerkstatt.Ilicop.Web
             var transferFileNameWithoutExtension = Path.GetFileNameWithoutExtension(transferFile);
             var logPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.log");
             var xtfLogPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.xtf");
+            var csvLogPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.csv");
             var transferFilePath = Path.Combine(homeDirectory, transferFile);
             var xmlCatalogFiles = fileProvider.GetFiles()
                 .Where(file => Path.GetExtension(file).Equals(".xml", StringComparison.OrdinalIgnoreCase) && !file.Equals(transferFile, StringComparison.OrdinalIgnoreCase))
@@ -213,6 +214,7 @@ namespace Geowerkstatt.Ilicop.Web
                 TransferFilePath = transferFilePath,
                 LogFilePath = logPath,
                 XtfLogFilePath = xtfLogPath,
+                CsvLogFilePath = csvLogPath,
                 GpkgModelNames = GpkgModelNames,
                 AdditionalCatalogueFilePaths = xmlCatalogFiles,
                 Profile = profile,

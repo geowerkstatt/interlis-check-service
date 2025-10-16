@@ -20,5 +20,10 @@
         /// Log containing error messages and warnings related to a coordinate in GeoJSON (RFC 7946) format.
         /// </summary>
         GeoJson,
+
+        /// <summary>
+        /// Log containing error messages and warnings in CSV format.
+        /// </summary>
+        Csv,
     }
 }

@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import DayJS from "dayjs";
 import { Card, Col, Container, Row } from "react-bootstrap";
 import { GoFile, GoFileCode } from "react-icons/go";
-import { BsGeoAlt, BsLink45Deg } from "react-icons/bs";
+import { BsGeoAlt, BsLink45Deg, BsFiletypeCsv } from "react-icons/bs";
 import { LogDisplay } from "./logDisplay";
 
 export const Protokoll = (props) => {
@@ -94,6 +94,18 @@ export const Protokoll = (props) => {
                             <BsLink45Deg />
                             <span className="icon-tooltip-text">{copyToClipboardTooltipText}</span>
                           </div>
+                        </span>
+                      )}
+                      {statusData.csvLogUrl && (
+                        <span className="icon-tooltip">
+                          <a
+                            download={protokollFileName + ".csv"}
+                            className={statusClass + " download-icon"}
+                            href={statusData.csvLogUrl}
+                          >
+                            <BsFiletypeCsv />
+                          </a>
+                          <span className="icon-tooltip-text">CSV-Log-Datei herunterladen</span>
                         </span>
                       )}
                       {statusData.geoJsonLogUrl && (
