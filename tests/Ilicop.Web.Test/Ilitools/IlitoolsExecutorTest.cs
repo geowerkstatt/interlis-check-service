@@ -24,6 +24,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         public void Initialize()
         {
             loggerMock = new Mock<ILogger<IlitoolsExecutor>>();
+            configuration = new ConfigurationBuilder().Build();
 
             ilitoolsEnvironment = new IlitoolsEnvironment
             {
@@ -35,17 +36,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 Ili2GpkgPath = "/path/to/ili2gpkg.jar",
             };
 
-            configuration = CreateConfiguration();
             ilitoolsExecutor = new IlitoolsExecutor(loggerMock.Object, ilitoolsEnvironment, configuration);
-        }
-
-        private IConfiguration CreateConfiguration(string commandFormat = "{0}")
-        {
-            return new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
-            {
-                { "Validation:CommandFormat", commandFormat },
-                { "Validation:BlacklistedGpkgModels", "PEEVEDSCAN;WRONGPENGUIN;SPORKDEITY" },
-            }).Build();
         }
 
         [TestMethod]
@@ -63,7 +54,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             var request = CreateValidationRequest("/test/path", "test.xtf", "DEFAULT");
             var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
 
-            var expected = $"java -jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --csvlog \"{request.CsvLogFilePath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" \"{request.TransferFilePath}\"";
+            var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --csvlog \"{request.CsvLogFilePath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
         }
 
@@ -73,7 +64,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             var request = CreateValidationRequest("/test/path", "test.xtf", "DEFAULT", additionalCatalogueFilePaths: new List<string> { "additionalTestFile.xml" });
             var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
 
-            var expected = $"java -jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --csvlog \"{request.CsvLogFilePath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" \"{request.TransferFilePath}\" \"additionalTestFile.xml\"";
+            var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --csvlog \"{request.CsvLogFilePath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" \"{request.TransferFilePath}\" \"additionalTestFile.xml\"";
             Assert.AreEqual(expected, command);
         }
 
@@ -83,7 +74,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             var request = CreateValidationRequest("/test/path", "test.gpkg", "DEFAULT", "Model1;Model2");
             var command = ilitoolsExecutor.CreateIli2GpkgCommand(request);
 
-            var expected = $"java -jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --models \"Model1;Model2\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" --dbfile \"{request.TransferFilePath}\"";
+            var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --models \"Model1;Model2\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" --dbfile \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
         }
 
@@ -93,35 +84,8 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             var request = CreateValidationRequest("/test/path", "test.gpkg", "DEFAULT");
             var command = ilitoolsExecutor.CreateIli2GpkgCommand(request);
 
-            var expected = $"java -jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" --dbfile \"{request.TransferFilePath}\"";
+            var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" --dbfile \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
-        }
-
-        [TestMethod]
-        public void CreateIlivalidatorCommandWithCustomCommandFormat()
-        {
-            var customConfig = CreateConfiguration("custom {0} wrapper");
-            var customExecutor = new IlitoolsExecutor(loggerMock.Object, ilitoolsEnvironment, customConfig);
-            var request = CreateValidationRequest("/test/path", "test.xtf", "DEFAULT");
-            var command = string.Format(CultureInfo.InvariantCulture, "custom {0} wrapper", customExecutor.CreateIlivalidatorCommand(request));
-
-            var expected = $"custom java -jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --csvlog \"{request.CsvLogFilePath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:DEFAULT\" \"{request.TransferFilePath}\" wrapper";
-            Assert.AreEqual(expected, command);
-        }
-
-        [TestMethod]
-        public void ExecuteIlivalidatorAsyncFormatsCommandCorrectly()
-        {
-            var dummyRequest = CreateValidationRequest("/PEEVEDBAGEL/", "ANT.XTF", "DEFAULT");
-            var customConfig = CreateConfiguration("dada hopp monkey:latest sh {0}");
-            var customExecutor = new IlitoolsExecutor(loggerMock.Object, ilitoolsEnvironment, customConfig);
-            var command = customExecutor.CreateIlivalidatorCommand(dummyRequest);
-            var formattedCommand = string.Format(CultureInfo.InvariantCulture, "dada hopp monkey:latest sh {0}", command);
-
-            StringAssert.Contains(formattedCommand, "dada hopp monkey:latest sh java -jar");
-            StringAssert.Contains(formattedCommand, $"\"{dummyRequest.LogFilePath}\"");
-            StringAssert.Contains(formattedCommand, $"\"{dummyRequest.XtfLogFilePath}\"");
-            StringAssert.Contains(formattedCommand, $"\"{dummyRequest.TransferFilePath}\"");
         }
 
         [TestMethod]
