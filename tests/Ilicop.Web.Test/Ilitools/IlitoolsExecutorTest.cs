@@ -114,6 +114,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             var transferFileNameWithoutExtension = Path.GetFileNameWithoutExtension(transferFile);
             var logPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.log");
             var xtfLogPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.xtf");
+            var csvLogPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.csv");
             var transferFilePath = Path.Combine(homeDirectory, transferFile);
 
             return new ValidationRequest
@@ -122,6 +123,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 TransferFilePath = transferFilePath,
                 LogFilePath = logPath,
                 XtfLogFilePath = xtfLogPath,
+                CsvLogFilePath = csvLogPath,
                 GpkgModelNames = modelNames,
                 AdditionalCatalogueFilePaths = additionalCatalogueFilePaths ?? new List<string>(),
                 Profile = new Profile { Id = profileId },
