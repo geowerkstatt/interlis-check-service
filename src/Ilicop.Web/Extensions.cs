@@ -35,15 +35,6 @@ namespace Geowerkstatt.Ilicop.Web
         }
 
         /// <summary>
-        /// Gets the name of the process executable.
-        /// Shorthand for GetSection("Validation")["ShellExecutable"].
-        /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <returns>The name of the process executable.</returns>
-        public static string GetShellExecutable(this IConfiguration configuration) =>
-            configuration.GetSection("Validation")["ShellExecutable"];
-
-        /// <summary>
         /// Removes referenced and blacklisted model names in order to be able to successfully validate with ili2gpkg.
         /// </summary>
         /// <param name="rawGpkgModelNames">Untouched (raw) model names from a GeoPackage SQLite database (gpkg).</param>
