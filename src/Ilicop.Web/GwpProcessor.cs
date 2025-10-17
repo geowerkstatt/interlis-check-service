@@ -16,18 +16,18 @@ public class GwpProcessor : IProcessor
 {
     private readonly IConfiguration configuration;
     private readonly IFileProvider fileProvider;
-    private readonly DirectoryInfo templateDir;
+    private readonly DirectoryInfo configDir;
     private readonly ILogger<GwpProcessor> logger;
 
-    public GwpProcessor(IConfiguration configuration, string rootDirectoryEnvironmentKey, IFileProvider fileProvider, ILogger<GwpProcessor> logger)
+    public GwpProcessor(IConfiguration configuration, string configDirectoryEnvironmentKey, IFileProvider fileProvider, ILogger<GwpProcessor> logger)
     {
-        ArgumentNullException.ThrowIfNull(rootDirectoryEnvironmentKey, nameof(rootDirectoryEnvironmentKey));
+        ArgumentNullException.ThrowIfNull(configDirectoryEnvironmentKey, nameof(configDirectoryEnvironmentKey));
 
         this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         this.fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        templateDir = new DirectoryInfo(configuration.GetValue<string>(rootDirectoryEnvironmentKey));
+        configDir = new DirectoryInfo(configuration.GetValue<string>(configDirectoryEnvironmentKey));
     }
 
     /// <inheritdoc />
@@ -88,7 +88,7 @@ public class GwpProcessor : IProcessor
     /// <exception cref="InvalidOperationException">If more than one file matches the <paramref name="searchPattern"/>.</exception>
     private string GetTemplateFilePath(Profile profile, string searchPattern)
     {
-        var profileTemplatesPath = Path.Combine(templateDir.FullName, profile.Id);
+        var profileTemplatesPath = Path.Combine(configDir.FullName, profile.Id);
 
         if (Directory.Exists(profileTemplatesPath))
         {

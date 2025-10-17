@@ -100,7 +100,7 @@ namespace Geowerkstatt.Ilicop.Web
             services.AddTransient<IProcessor, GwpProcessor>(x =>
                 new GwpProcessor(
                     x.GetRequiredService<IConfiguration>(),
-                    "TEMPLATE_DIR",
+                    "ILICOP_CONFIG_DIR",
                     x.GetRequiredService<IFileProvider>(),
                     x.GetRequiredService<ILogger<GwpProcessor>>()));
             services.AddControllers().AddJsonOptions(options =>
