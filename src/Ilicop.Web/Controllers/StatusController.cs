@@ -55,6 +55,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                 StatusMessage = job.StatusMessage,
                 LogUrl = GetLogDownloadUrl(version, jobId, LogType.Log),
                 XtfLogUrl = xtfLogUrl,
+                ZipUrl = GetLogDownloadUrl(version, jobId, LogType.Zip),
                 CsvLogUrl = csvLogUrl,
                 JsonLogUrl = xtfLogUrl == null ? null : GetJsonLogUrl(version, jobId), // JSON is generated from the XTF log file
                 GeoJsonLogUrl = GetLogDownloadUrl(version, jobId, LogType.GeoJson),

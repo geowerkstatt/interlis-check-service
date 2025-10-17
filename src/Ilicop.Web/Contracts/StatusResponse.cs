@@ -37,6 +37,11 @@ namespace Geowerkstatt.Ilicop.Web.Contracts
         public Uri XtfLogUrl { get; set; }
 
         /// <summary>
+        /// The ZIP url if available; otherwise, <c>null</c>. Please be aware that the log file might not be complete while validation is still processing.
+        /// </summary>
+        public Uri ZipUrl { get; set; }
+
+        /// <summary>
         /// The CSV log url if available; otherwise, <c>null</c>. Please be aware that the log file might not be complete while validation is still processing.
         /// </summary>
         public Uri CsvLogUrl { get; set; }

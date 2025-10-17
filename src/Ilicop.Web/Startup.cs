@@ -97,6 +97,12 @@ namespace Geowerkstatt.Ilicop.Web
             services.AddHostedService(services => (ValidatorService)services.GetService<IValidatorService>());
             services.AddTransient<IValidator, Validator>();
             services.AddTransient<IFileProvider, PhysicalFileProvider>(x => new PhysicalFileProvider(x.GetRequiredService<IConfiguration>(), "ILICOP_UPLOADS_DIR"));
+            services.AddTransient<IProcessor, GwpProcessor>(x =>
+                new GwpProcessor(
+                    x.GetRequiredService<IConfiguration>(),
+                    "TEMPLATE_DIR",
+                    x.GetRequiredService<IFileProvider>(),
+                    x.GetRequiredService<ILogger<GwpProcessor>>()));
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));

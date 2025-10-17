@@ -22,6 +22,11 @@
         GeoJson,
 
         /// <summary>
+        /// Zip archive containing all available artifacts.
+        /// </summary>
+        Zip,
+
+        /// <summary>
         /// Log containing error messages and warnings in CSV format.
         /// </summary>
         Csv,
