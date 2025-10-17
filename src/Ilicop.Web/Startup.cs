@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -140,6 +139,8 @@ namespace Geowerkstatt.Ilicop.Web
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddReverseProxy().LoadFromConfig(Configuration.GetSection("ReverseProxy"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -176,7 +177,6 @@ namespace Geowerkstatt.Ilicop.Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-
             app.UseCors("CorsSettings");
             app.UseRouting();
 
@@ -184,6 +184,7 @@ namespace Geowerkstatt.Ilicop.Web
             {
                 endpoints.MapControllerRoute(name: "default", pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapHealthChecks("/health");
+                endpoints.MapReverseProxy();
             });
 
             app.UseSwagger(options =>

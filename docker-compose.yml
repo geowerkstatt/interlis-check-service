@@ -143,6 +143,8 @@ services:
       - PUID=1000
       - PGID=1000
       - ENABLE_GPKG_VALIDATION=true
+      - ReverseProxy__Clusters__qgisservercluster__Destinations__qgisserver__Address=http://qgis-server:80/
+  
     # Expose ports (HOST:CONTAINER)
     #
     # ports:
@@ -154,12 +156,10 @@ services:
 
   qgis-server:
     image: camptocamp/qgis-server:latest
-    container_name: qgis_server
     ports:
       - "8380:80"
     volumes:
-      - ./config/qgisserver:/etc/qgisserver
+      - ./data/Uploads:/uploads
     environment:
       - QGIS_SERVER_LOG_LEVEL=0  # INFO (log all requests)
       - DEBUG=1                  # display env before spawning QGIS Server
-      - QGIS_SERVER_LANDING_PAGE_PROJECTS_DIRECTORIES=/etc/qgisserver/validationWithID0000
