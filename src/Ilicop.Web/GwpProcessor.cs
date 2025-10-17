@@ -29,15 +29,15 @@ public class GwpProcessor : IProcessor
         this.fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        configDir = new DirectoryInfo(configuration.GetValue<string>(configDirectoryEnvironmentKey));
+        var configDirectoryEnvironmentValue = configuration.GetValue<string>(configDirectoryEnvironmentKey);
+        if (configDirectoryEnvironmentValue != null)
+            configDir = new DirectoryInfo(configDirectoryEnvironmentValue);
     }
 
     /// <inheritdoc />
     public void Run(Guid jobId, Profile profile)
     {
-        var profileConfigDir = new DirectoryInfo(Path.Combine(configDir.FullName, profile.Id));
-
-        if (!profileConfigDir.Exists)
+        if (configDir == null || !Directory.Exists(Path.Combine(configDir.FullName, profile.Id)))
         {
             logger.LogInformation("No configuration directory found for profile <{ProfileId}>. Skipping GWP processing for job <{JobId}>.", profile.Id, jobId);
             return;
