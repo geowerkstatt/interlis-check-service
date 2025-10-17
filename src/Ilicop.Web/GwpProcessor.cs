@@ -14,6 +14,8 @@ namespace Geowerkstatt.Ilicop.Web;
 /// </summary>
 public class GwpProcessor : IProcessor
 {
+    private const string AdditionalFilesFolderName = "AdditionalFiles";
+
     private readonly IConfiguration configuration;
     private readonly IFileProvider fileProvider;
     private readonly DirectoryInfo configDir;
@@ -33,6 +35,14 @@ public class GwpProcessor : IProcessor
     /// <inheritdoc />
     public void Run(Guid jobId, Profile profile)
     {
+        var profileConfigDir = new DirectoryInfo(Path.Combine(configDir.FullName, profile.Id));
+
+        if (!profileConfigDir.Exists)
+        {
+            logger.LogInformation("No configuration directory found for profile <{ProfileId}>. Skipping GWP processing for job <{JobId}>.", profile.Id, jobId);
+            return;
+        }
+
         CreateZip(jobId, profile);
     }
 
@@ -59,11 +69,16 @@ public class GwpProcessor : IProcessor
             }
         }
 
-        var aprxFilePath = GetTemplateFilePath(profile, "*.aprx");
-        var qgzFilePath = GetTemplateFilePath(profile, "*.qgz");
-
-        if (aprxFilePath != null) filesToZip.Add((aprxFilePath, Path.GetFileName(aprxFilePath)));
-        if (qgzFilePath != null) filesToZip.Add((qgzFilePath, Path.GetFileName(qgzFilePath)));
+        var additionalFilesDirPath = Path.Combine(configDir.FullName, profile.Id, AdditionalFilesFolderName);
+        if (Directory.Exists(additionalFilesDirPath))
+        {
+            var additionalFiles = Directory.GetFiles(additionalFilesDirPath);
+            foreach (var additionalFile in additionalFiles)
+            {
+                var fileName = Path.GetFileName(additionalFile);
+                filesToZip.Add((additionalFile, fileName));
+            }
+        }
 
         var zipFileStream = fileProvider.CreateFile("gwp_results_log.zip");
         using (var archive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
@@ -76,33 +91,5 @@ public class GwpProcessor : IProcessor
         }
 
         logger.LogInformation("Successfully created ZIP for job <{JobId}>.", jobId);
-    }
-
-    /// <summary>
-    /// Gets the full file path of the file matching the <paramref name="searchPattern"/> in the template folder for the specified <paramref name="profile"/>.
-    /// The <paramref name="searchPattern"/> must not match more than one file; otherwise an exception is thrown.
-    /// </summary>
-    /// <param name="profile">The profile for which to get the template file path.</param>
-    /// <param name="searchPattern">The search pattern to match the template file. "?" and "*" can be used as wildcards. Regex is not supported.</param>
-    /// <returns>The full file path of the matching file; otherwise, <c>null</c> if no file matches the <paramref name="searchPattern"/>.</returns>
-    /// <exception cref="InvalidOperationException">If more than one file matches the <paramref name="searchPattern"/>.</exception>
-    private string GetTemplateFilePath(Profile profile, string searchPattern)
-    {
-        var profileTemplatesPath = Path.Combine(configDir.FullName, profile.Id);
-
-        if (Directory.Exists(profileTemplatesPath))
-        {
-            var matchingFiles = Directory
-                .GetFiles(profileTemplatesPath, searchPattern, SearchOption.TopDirectoryOnly);
-
-            if (matchingFiles.Length > 1)
-            {
-                throw new InvalidOperationException($"More than one file matches the search pattern '{searchPattern}' for profile '{profile.Id}'.");
-            }
-
-            return matchingFiles.SingleOrDefault();
-        }
-
-        return null;
     }
 }
