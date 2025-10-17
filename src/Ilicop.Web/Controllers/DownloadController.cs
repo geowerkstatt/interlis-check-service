@@ -47,6 +47,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                 {
                     LogType.Log => File(fileStream, MediaTypeNames.Text.Plain),
                     LogType.Xtf => File(fileStream, "text/xml; charset=utf-8"),
+                    LogType.Csv => File(fileStream, MediaTypeNames.Text.Csv),
                     LogType.GeoJson => File(fileStream, "application/geo+json"),
                     _ => throw new NotSupportedException($"Log type <{logType}> is not supported."),
                 };

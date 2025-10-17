@@ -134,7 +134,7 @@ namespace Geowerkstatt.Ilicop.Web
             {
                 yield return transferFile;
 
-                var logFileExtensions = new[] { ".log", ".xtf" };
+                var logFileExtensions = new[] { ".log", ".xtf", ".csv" };
                 foreach (var file in fileNames)
                 {
                     if (!logFileExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
