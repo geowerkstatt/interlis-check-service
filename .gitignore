@@ -22,15 +22,19 @@ github_nuget_token.txt
 x64/
 x86/
 [Bb]uild/
-[Ll]ogs/
-[Uu]ploads/
-[Ww]eb-[Aa]ssets/
-**/data/[Ii]li*/
 bld/
 bin/
 Bin/
 obj/
 Obj/
+
+# ilicop mounted directories
+data/[Ww]eb-[Aa]ssets/
+data/[Uu]ploads/
+data/[Ll]ogs/
+data/[Ii]litools/
+data/[Ii]licache/
+data/[Ii]liplugins/
 
 # Visual Studio 2015 cache/options directory
 .vs/

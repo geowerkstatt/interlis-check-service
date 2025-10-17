@@ -5,7 +5,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ILICOP_UPLOADS_DIR": "Uploads",
+        "ILICOP_UPLOADS_DIR": "../../data/Uploads",
         "ILITOOLS_HOME_DIR": "../../data/ilitools",
         "ILITOOLS_CACHE_DIR": "../../data/ilicache",
         "ILITOOLS_PLUGINS_DIR": "../../data/iliplugins",
