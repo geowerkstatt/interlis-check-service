@@ -1,10 +1,14 @@
 {
+  "profiles": {
     "Ilicop.Web": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ILICOP_UPLOADS_DIR": "Uploads",
+        "ILITOOLS_HOME_DIR": "../../data/ilitools",
+        "ILITOOLS_CACHE_DIR": "../../data/ilicache",
+        "ILITOOLS_PLUGINS_DIR": "../../data/iliplugins",
         "ILITOOLS_MODEL_REPOSITORY_DIR": "../../data/repositories/default",
         "ENABLE_GPKG_VALIDATION": "true"
       },

@@ -25,9 +25,7 @@ x86/
 [Ll]ogs/
 [Uu]ploads/
 [Ww]eb-[Aa]ssets/
-**/[Ii]litools/ili*/
-**/cache/
-[Pp]lugins/
+**/data/[Ii]li*/
 bld/
 bin/
 Bin/
