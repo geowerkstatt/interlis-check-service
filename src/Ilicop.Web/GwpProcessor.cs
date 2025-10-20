@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 
 namespace Geowerkstatt.Ilicop.Web;
 
@@ -15,6 +14,7 @@ namespace Geowerkstatt.Ilicop.Web;
 public class GwpProcessor : IProcessor
 {
     private const string AdditionalFilesFolderName = "AdditionalFiles";
+    private const string ZipFileName = "gwp_results_log.zip";
 
     private readonly IConfiguration configuration;
     private readonly IFileProvider fileProvider;
@@ -50,11 +50,29 @@ public class GwpProcessor : IProcessor
     {
         logger.LogInformation("Creating ZIP for job <{JobId}>.", jobId);
 
+        var filesToZip = GetFilesToZip(jobId, profile);
+
+        var zipFileStream = fileProvider.CreateFile(ZipFileName);
+        using (var archive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
+        {
+            foreach (var fileToZip in filesToZip)
+            {
+                archive.CreateEntryFromFile(fileToZip.Path, fileToZip.Name, CompressionLevel.Optimal);
+                logger.LogTrace("Added file <{FileName}> to ZIP for job <{JobId}>", fileToZip.Name, jobId);
+            }
+        }
+
+        logger.LogInformation("Successfully created ZIP for job <{JobId}>.", jobId);
+    }
+
+    private List<(string Path, string Name)> GetFilesToZip(Guid jobId, Profile profile)
+    {
         fileProvider.Initialize(jobId);
         var homeDirectory = fileProvider.HomeDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
         var filesToZip = new List<(string Path, string Name)>();
 
+        // Add all available log files
         foreach (var logType in Enum.GetValues<LogType>())
         {
             try
@@ -69,6 +87,7 @@ public class GwpProcessor : IProcessor
             }
         }
 
+        // Add additional files from configuration directory
         var additionalFilesDirPath = Path.Combine(configDir.FullName, profile.Id, AdditionalFilesFolderName);
         if (Directory.Exists(additionalFilesDirPath))
         {
@@ -80,16 +99,6 @@ public class GwpProcessor : IProcessor
             }
         }
 
-        var zipFileStream = fileProvider.CreateFile("gwp_results_log.zip");
-        using (var archive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
-        {
-            foreach (var fileToZip in filesToZip)
-            {
-                archive.CreateEntryFromFile(fileToZip.Path, fileToZip.Name, CompressionLevel.Optimal);
-                logger.LogTrace("Added file <{FileName}> to ZIP for job <{JobId}>", fileToZip.Name, jobId);
-            }
-        }
-
-        logger.LogInformation("Successfully created ZIP for job <{JobId}>.", jobId);
+        return filesToZip;
     }
 }
