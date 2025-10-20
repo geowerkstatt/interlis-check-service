@@ -70,11 +70,11 @@ services:
     #   - /path/to/local/model/repository:/repository
     #     Folder containing the local model repository
     volumes:
-      - ./src/Ilicop.Web/Logs:/logs
-      - ./src/Ilicop.Web/Uploads:/uploads
-      - ./src/Ilicop.Web/Ilitools:/ilitools
-      - ./src/Ilicop.Web/Plugins:/plugins
-      - ./src/Ilicop.Web/Web-Assets:/web-assets
+      - ./data/Logs:/logs
+      - ./data/Uploads:/uploads
+      - ./data/ilitools:/ilitools
+      - ./data/iliplugins:/plugins
+      - ./data/Web-Assets:/web-assets
       - ./data/repositories/multi_profile:/repository
     # Add environment variables
     #

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,10 +54,9 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
             try
             {
-                var commandFormat = configuration.GetSection("Validation")["CommandFormat"];
-                var command = string.Format(CultureInfo.InvariantCulture, commandFormat, CreateIlivalidatorCommand(request));
+                var command = CreateIlivalidatorCommand(request);
 
-                var exitCode = await ExecuteCommandAsync(command, cancellationToken);
+                var exitCode = await ExecuteJavaCommandAsync(command, cancellationToken);
 
                 logger.LogInformation(
                     "Validation completed for {TransferFile} with exit code {ExitCode}.",
@@ -87,10 +85,9 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
             try
             {
-                var commandFormat = configuration.GetSection("Validation")["CommandFormat"];
-                var command = string.Format(CultureInfo.InvariantCulture, commandFormat, CreateIli2GpkgCommand(request));
+                var command = CreateIli2GpkgCommand(request);
 
-                var exitCode = await ExecuteCommandAsync(command, cancellationToken);
+                var exitCode = await ExecuteJavaCommandAsync(command, cancellationToken);
 
                 logger.LogInformation(
                     "Validation completed for {TransferFile} with exit code {ExitCode}.",
@@ -113,7 +110,6 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         {
             var args = new List<string>
             {
-                "java",
                 "-jar",
                 $"\"{ilitoolsEnvironment.IlivalidatorPath}\"",
             };
@@ -153,7 +149,6 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         {
             var args = new List<string>
             {
-                "java",
                 "-jar",
                 $"\"{ilitoolsEnvironment.Ili2GpkgPath}\"",
                 "--validate",
@@ -219,22 +214,22 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         }
 
         /// <summary>
-        /// Asynchronously executes the given <paramref name="command"/> on the shell specified in <see cref="Extensions.GetShellExecutable(IConfiguration)"/>.
+        /// Asynchronously executes the given <paramref name="command"/> on the Java runtime.
         /// </summary>
         /// <param name="command">The command to execute.</param>
         /// <param name="cancellationToken">An optional <see cref="CancellationToken"/> to cancel the asynchronous operation.</param>
         /// <returns>The exit code that the associated process specified when it terminated.</returns>
-        private async Task<int> ExecuteCommandAsync(string command, CancellationToken cancellationToken)
+        private async Task<int> ExecuteJavaCommandAsync(string command, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Executing command: {Command}", command);
+            logger.LogInformation("Executing command: java {Command}", command);
 
             using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = configuration.GetShellExecutable(),
+                    FileName = "java",
                     Arguments = command,
-                    UseShellExecute = true,
+                    RedirectStandardError = true,
                 },
                 EnableRaisingEvents = true,
             };
@@ -243,6 +238,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
             try
             {
+                logger.LogTrace(await process.StandardError.ReadToEndAsync(cancellationToken));
                 await process.WaitForExitAsync(cancellationToken);
                 return process.ExitCode;
             }
