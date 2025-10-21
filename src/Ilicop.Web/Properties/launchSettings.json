@@ -6,7 +6,6 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ILICOP_UPLOADS_DIR": "../../data/Uploads",
-        "ILICOP_CONFIG_DIR": "../../data/config",
         "ILITOOLS_HOME_DIR": "../../data/ilitools",
         "ILITOOLS_CACHE_DIR": "../../data/ilicache",
         "ILITOOLS_PLUGINS_DIR": "../../data/iliplugins",
