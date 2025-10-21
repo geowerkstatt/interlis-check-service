@@ -4,8 +4,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 
 namespace Geowerkstatt.Ilicop.Web;
 
@@ -68,19 +70,9 @@ public class GwpProcessor : IProcessor
         var filesToZip = new List<(string Path, string Name)>();
 
         // Add all available log files
-        foreach (var logType in Enum.GetValues<LogType>())
-        {
-            try
-            {
-                var logFileName = fileProvider.GetLogFile(logType);
-                var logFileFullPath = Path.Combine(homeDirectory, logFileName);
-                filesToZip.Add((logFileFullPath, $"log.{logType}"));
-            }
-            catch
-            {
-                logger.LogTrace("Log file for log type <{LogType}> not found for job <{JobId}>.", logType, jobId);
-            }
-        }
+        fileProvider.GetFiles()
+            .Where(f => Path.GetFileNameWithoutExtension(f).EndsWith("_log", true, CultureInfo.InvariantCulture))
+            .Select(f => (Path: Path.Combine(homeDirectory, f), Name: $"log{Path.GetExtension(f)}"));
 
         // Add additional files from configuration directory
         var additionalFilesDirPath = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.AdditionalFilesFolderName);
