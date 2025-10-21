@@ -1,6 +1,7 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,25 +14,19 @@ namespace Geowerkstatt.Ilicop.Web;
 /// </summary>
 public class GwpProcessor : IProcessor
 {
-    private const string AdditionalFilesFolderName = "AdditionalFiles";
-    private const string ZipFileName = "gwp_results_log.zip";
-
-    private readonly IConfiguration configuration;
     private readonly IFileProvider fileProvider;
     private readonly DirectoryInfo configDir;
     private readonly ILogger<GwpProcessor> logger;
+    private readonly GwpProcessorOptions gwpProcessorOptions;
 
-    public GwpProcessor(IConfiguration configuration, string configDirectoryEnvironmentKey, IFileProvider fileProvider, ILogger<GwpProcessor> logger)
+    public GwpProcessor(IOptions<GwpProcessorOptions> gwpProcessorOptions, IFileProvider fileProvider, ILogger<GwpProcessor> logger)
     {
-        ArgumentNullException.ThrowIfNull(configDirectoryEnvironmentKey, nameof(configDirectoryEnvironmentKey));
-
-        this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         this.fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this.gwpProcessorOptions = gwpProcessorOptions?.Value ?? throw new ArgumentNullException(nameof(gwpProcessorOptions));
 
-        var configDirectoryEnvironmentValue = configuration.GetValue<string>(configDirectoryEnvironmentKey);
-        if (configDirectoryEnvironmentValue != null)
-            configDir = new DirectoryInfo(configDirectoryEnvironmentValue);
+        if (this.gwpProcessorOptions.ConfigDir != null)
+            this.configDir = new DirectoryInfo(this.gwpProcessorOptions.ConfigDir);
     }
 
     /// <inheritdoc />
@@ -52,7 +47,7 @@ public class GwpProcessor : IProcessor
 
         var filesToZip = GetFilesToZip(jobId, profile);
 
-        var zipFileStream = fileProvider.CreateFile(ZipFileName);
+        var zipFileStream = fileProvider.CreateFile(gwpProcessorOptions.ZipFileName);
         using (var archive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
         {
             foreach (var fileToZip in filesToZip)
@@ -88,7 +83,7 @@ public class GwpProcessor : IProcessor
         }
 
         // Add additional files from configuration directory
-        var additionalFilesDirPath = Path.Combine(configDir.FullName, profile.Id, AdditionalFilesFolderName);
+        var additionalFilesDirPath = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.AdditionalFilesFolderName);
         if (Directory.Exists(additionalFilesDirPath))
         {
             var additionalFiles = Directory.GetFiles(additionalFilesDirPath);
