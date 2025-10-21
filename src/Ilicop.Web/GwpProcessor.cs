@@ -1,4 +1,5 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
+using Geowerkstatt.Ilicop.Web.Ilitools;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -8,7 +9,8 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Geowerkstatt.Ilicop.Web;
 
@@ -21,19 +23,25 @@ public class GwpProcessor : IProcessor
     private readonly DirectoryInfo configDir;
     private readonly ILogger<GwpProcessor> logger;
     private readonly GwpProcessorOptions gwpProcessorOptions;
+    private readonly IlitoolsExecutor ilitoolsExecutor;
 
-    public GwpProcessor(IOptions<GwpProcessorOptions> gwpProcessorOptions, IFileProvider fileProvider, ILogger<GwpProcessor> logger)
+    public GwpProcessor(
+        IOptions<GwpProcessorOptions> gwpProcessorOptions,
+        IFileProvider fileProvider,
+        IlitoolsExecutor ilitoolsExecutor,
+        ILogger<GwpProcessor> logger)
     {
         this.fileProvider = fileProvider ?? throw new ArgumentNullException(nameof(fileProvider));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this.gwpProcessorOptions = gwpProcessorOptions?.Value ?? throw new ArgumentNullException(nameof(gwpProcessorOptions));
+        this.ilitoolsExecutor = ilitoolsExecutor ?? throw new ArgumentNullException(nameof(ilitoolsExecutor));
 
         if (this.gwpProcessorOptions.ConfigDir != null)
             this.configDir = new DirectoryInfo(this.gwpProcessorOptions.ConfigDir);
     }
 
     /// <inheritdoc />
-    public void Run(Guid jobId, Profile profile)
+    public async Task Run(Guid jobId, string transferFile, Profile profile, CancellationToken cancellationToken)
     {
         if (configDir == null || !Directory.Exists(Path.Combine(configDir.FullName, profile.Id)))
         {
@@ -41,7 +49,68 @@ public class GwpProcessor : IProcessor
             return;
         }
 
+        await CreateGpkg(jobId, transferFile, profile, cancellationToken);
         CreateZip(jobId, profile);
+    }
+
+    private async Task CreateGpkg(Guid jobId, string transferFile, Profile profile, CancellationToken cancellationToken)
+    {
+        var dataGpkgFilePath = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.DataGpkgFileName);
+
+        if (!File.Exists(dataGpkgFilePath))
+        {
+            logger.LogWarning("No data GeoPackage file found at <{GpkgFilePath}> for profile <{ProfileId}>. Skipping GWP GeoPackage creation for job <{JobId}>.", dataGpkgFilePath, profile.Id, jobId);
+            return;
+        }
+
+        fileProvider.Initialize(jobId);
+        var destGpkgFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, gwpProcessorOptions.DataGpkgFileName);
+
+        using (var destGpkgFileStream = fileProvider.CreateFile(destGpkgFilePath))
+        using (var sourceGpkgFileStream = File.OpenRead(dataGpkgFilePath))
+        {
+            sourceGpkgFileStream.CopyTo(destGpkgFileStream);
+        }
+
+        var transferFileImportExitCode = await ImportTransferFileToGpkg(fileProvider, destGpkgFilePath, transferFile, profile, cancellationToken);
+        var logFileImportExitCode = await ImportLogToGpkg(fileProvider, destGpkgFilePath, profile, cancellationToken);
+
+        if (transferFileImportExitCode + logFileImportExitCode != 0)
+        {
+            logger.LogInformation("Data could not be imported into GeoPackage for job <{JobId}>.", jobId);
+            File.Delete(destGpkgFilePath);
+        }
+    }
+
+    private async Task<int> ImportLogToGpkg(IFileProvider fileProvider, string gpkgFilePath, Profile profile, CancellationToken cancellationToken)
+    {
+        var logFileName = fileProvider.GetFiles().FirstOrDefault(f => f.EndsWith("_log.xtf", StringComparison.InvariantCultureIgnoreCase));
+        var logFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, logFileName);
+
+        var logFileImportRequest = new ImportRequest
+        {
+            FilePath = logFilePath,
+            FileName = logFileName,
+            DbFilePath = gpkgFilePath,
+            Profile = profile,
+        };
+
+        return await ilitoolsExecutor.ImportToGpkgAsync(logFileImportRequest, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<int> ImportTransferFileToGpkg(IFileProvider fileProvider, string gpkgFilePath, string transferFile, Profile profile, CancellationToken cancellationToken)
+    {
+        var transferFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, transferFile);
+
+        var transferFileImportRequest = new ImportRequest
+        {
+            FilePath = transferFilePath,
+            FileName = transferFile,
+            DbFilePath = gpkgFilePath,
+            Profile = profile,
+        };
+
+        return await ilitoolsExecutor.ImportToGpkgAsync(transferFileImportRequest, cancellationToken).ConfigureAwait(false);
     }
 
     private void CreateZip(Guid jobId, Profile profile)
@@ -70,6 +139,13 @@ public class GwpProcessor : IProcessor
         var filesToZip = new List<(string Path, string Name)>();
         filesToZip.AddRange(GetLogFilesToZip(fileProvider));
         filesToZip.AddRange(GetAdditionalFilesToZip(fileProvider, profile));
+
+        // Add GeoPackage if exists
+        var gpkgFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, gwpProcessorOptions.DataGpkgFileName);
+        if (File.Exists(gpkgFilePath))
+        {
+            filesToZip.Add((gpkgFilePath, gwpProcessorOptions.DataGpkgFileName));
+        }
 
         return filesToZip;
     }

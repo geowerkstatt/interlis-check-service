@@ -26,7 +26,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         }
 
         /// <summary>
-        /// Validates a transfer file using the appropriate ilitool based on the request.
+        /// Validates a file using the appropriate ilitool based on the request.
         /// </summary>
         public async Task<int> ValidateAsync(ValidationRequest request, CancellationToken cancellationToken)
         {
@@ -34,7 +34,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
             if (request.IsGeoPackage)
             {
-                return await ExecuteIli2GpkgAsync(request, cancellationToken).ConfigureAwait(false);
+                return await ExecuteIli2GpkgValidationAsync(request, cancellationToken).ConfigureAwait(false);
             }
             else
             {
@@ -43,14 +43,44 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         }
 
         /// <summary>
-        /// Validates a transfer file using the ilivalidator tool.
+        /// Imports an INTERLIS data file into an existing GeoPackage using the ili2gpkg tool.
+        /// </summary>
+        public async Task<int> ImportToGpkgAsync(ImportRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            if (!ilitoolsEnvironment.IsIli2GpkgInitialized) throw new InvalidOperationException("ili2gpkg is not properly initialized.");
+
+            logger.LogInformation("Starting import of <{TransferFile}> using ili2gpkg.", request.FilePath);
+
+            try
+            {
+                var command = CreateIli2GpkgImportCommand(request);
+
+                var exitCode = await ExecuteJavaCommandAsync(command, cancellationToken);
+
+                logger.LogInformation(
+                    "Import completed for <{TransferFile}> with exit code {ExitCode}.",
+                    request.FilePath,
+                    exitCode);
+
+                return exitCode;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to do import with ili2gpkg for <{TransferFile}>.", request.FilePath);
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// Validates a file using the ilivalidator tool.
         /// </summary>
         private async Task<int> ExecuteIlivalidatorAsync(ValidationRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             if (!ilitoolsEnvironment.IsIlivalidatorInitialized) throw new InvalidOperationException("Ilivalidator is not properly initialized.");
 
-            logger.LogInformation("Starting validation of {TransferFile} using ilivalidator.", request.TransferFileName);
+            logger.LogInformation("Starting validation of {TransferFile} using ilivalidator.", request.FileName);
 
             try
             {
@@ -60,45 +90,45 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
                 logger.LogInformation(
                     "Validation completed for {TransferFile} with exit code {ExitCode}.",
-                    request.TransferFileName,
+                    request.FileName,
                     exitCode);
 
                 return exitCode;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to execute ilivalidator for {TransferFile}.", request.TransferFileName);
+                logger.LogError(ex, "Failed to execute ilivalidator for {TransferFile}.", request.FileName);
                 return -1;
             }
         }
 
         /// <summary>
-        /// Validates a transfer file using the ili2gpkg tool.
+        /// Validates a file using the ili2gpkg tool.
         /// </summary>
-        private async Task<int> ExecuteIli2GpkgAsync(ValidationRequest request, CancellationToken cancellationToken)
+        private async Task<int> ExecuteIli2GpkgValidationAsync(ValidationRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             if (!ilitoolsEnvironment.IsIli2GpkgInitialized) throw new InvalidOperationException("ili2gpkg is not properly initialized.");
             if (request.AdditionalCatalogueFilePaths.Count > 0) throw new InvalidOperationException("Additional catalogue files are not supported for GPKG validation, aborting validation.");
 
-            logger.LogInformation("Starting validation of {TransferFile} using ili2gpkg.", request.TransferFileName);
+            logger.LogInformation("Starting validation of {TransferFile} using ili2gpkg.", request.FileName);
 
             try
             {
-                var command = CreateIli2GpkgCommand(request);
+                var command = CreateIli2GpkgValidationCommand(request);
 
                 var exitCode = await ExecuteJavaCommandAsync(command, cancellationToken);
 
                 logger.LogInformation(
                     "Validation completed for {TransferFile} with exit code {ExitCode}.",
-                    request.TransferFileName,
+                    request.FileName,
                     exitCode);
 
                 return exitCode;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to execute ili2gpkg for {TransferFile}.", request.TransferFileName);
+                logger.LogError(ex, "Failed to execute ili2gpkg for {TransferFile}.", request.FileName);
                 return -1;
             }
         }
@@ -131,7 +161,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             args.AddRange(GetCommonIlitoolsArguments(request));
 
             // Add transfer file path (without specific parameter name)
-            args.Add($"\"{request.TransferFilePath}\"");
+            args.Add($"\"{request.FilePath}\"");
 
             // Add additional catalogue files if present
             foreach (var cataloguePath in request.AdditionalCatalogueFilePaths)
@@ -143,9 +173,9 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         }
 
         /// <summary>
-        /// Creates the command for executing ili2gpkg.
+        /// Creates the command for validating with ili2gpkg.
         /// </summary>
-        internal string CreateIli2GpkgCommand(ValidationRequest request)
+        internal string CreateIli2GpkgValidationCommand(ValidationRequest request)
         {
             var args = new List<string>
             {
@@ -163,17 +193,43 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             args.AddRange(GetCommonIlitoolsArguments(request));
 
             // Add database file parameter
-            args.Add($"--dbfile \"{request.TransferFilePath}\"");
+            args.Add($"--dbfile \"{request.FilePath}\"");
 
             return args.JoinNonEmpty(" ");
         }
 
-        internal IEnumerable<string> GetCommonIlitoolsArguments(ValidationRequest request)
+        /// <summary>
+        /// Creates a command for importing data into a GeoPackage using ili2gpkg.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        internal string CreateIli2GpkgImportCommand(ImportRequest request)
         {
-            // Add common logging options
-            yield return $"--log \"{request.LogFilePath}\"";
-            yield return $"--xtflog \"{request.XtfLogFilePath}\"";
-            yield return "--verbose";
+            var args = new List<string>
+            {
+                "-jar",
+                $"\"{ilitoolsEnvironment.Ili2GpkgPath}\"",
+                "--import",
+                "--disableValidation",
+                $"--dbfile \"{request.DbFilePath}\"",
+            };
+
+            args.AddRange(GetCommonIlitoolsArguments(request));
+            args.Add($"\"{request.FilePath}\"");
+
+            return args.JoinNonEmpty(" ");
+        }
+
+        /// <summary>
+        /// Returns command arguments common to all ilitools invocations.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        internal IEnumerable<string> GetCommonIlitoolsArguments(IlitoolsRequest request)
+        {
+            if (request.LogFilePath != null) yield return $"--log \"{request.LogFilePath}\"";
+            if (request.XtfLogFilePath != null) yield return $"--xtflog \"{request.XtfLogFilePath}\"";
+            if (request.VerboseLogging) yield return "--verbose";
 
             // Add proxy settings
             var proxy = configuration.GetValue<string>("PROXY");

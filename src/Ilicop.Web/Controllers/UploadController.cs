@@ -147,8 +147,16 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                     validator.Id,
                     async cancellationToken =>
                     {
-                        await validator.ExecuteAsync(transferFile, foundProfile, cancellationToken);
-                        processor.Run(validator.Id, foundProfile);
+                        try
+                        {
+                            await validator.ExecuteAsync(transferFile, foundProfile, cancellationToken);
+                            await processor.Run(validator.Id, transferFile, foundProfile, cancellationToken);
+                        }
+                        catch (ValidationFailedException)
+                        {
+                            await processor.Run(validator.Id, transferFile, foundProfile, cancellationToken);
+                            throw;
+                        }
                     });
 
                 logger.LogInformation("Job with id <{JobId}> is scheduled for execution.", validator.Id);

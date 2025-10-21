@@ -22,4 +22,10 @@ public class GwpProcessorOptions
     /// The name of the resulting ZIP file containing GWP results and logs.
     /// </summary>
     public string ZipFileName { get; set; } = "gwp_results_log.zip";
+
+    /// <summary>
+    /// The name of the GeoPackage file into which the data and error logs should be imported.
+    /// The resulting GeoPackage file with the imported data gets added to the ZIP archive.
+    /// </summary>
+    public string DataGpkgFileName { get; set; } = "data.gpkg";
 }
