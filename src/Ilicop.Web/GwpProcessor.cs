@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Geowerkstatt.Ilicop.Web;
 
@@ -65,27 +66,29 @@ public class GwpProcessor : IProcessor
     private List<(string Path, string Name)> GetFilesToZip(Guid jobId, Profile profile)
     {
         fileProvider.Initialize(jobId);
-        var homeDirectory = fileProvider.HomeDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
         var filesToZip = new List<(string Path, string Name)>();
-
-        // Add all available log files
-        fileProvider.GetFiles()
-            .Where(f => Path.GetFileNameWithoutExtension(f).EndsWith("_log", true, CultureInfo.InvariantCulture))
-            .Select(f => (Path: Path.Combine(homeDirectory, f), Name: $"log{Path.GetExtension(f)}"));
-
-        // Add additional files from configuration directory
-        var additionalFilesDirPath = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.AdditionalFilesFolderName);
-        if (Directory.Exists(additionalFilesDirPath))
-        {
-            var additionalFiles = Directory.GetFiles(additionalFilesDirPath);
-            foreach (var additionalFile in additionalFiles)
-            {
-                var fileName = Path.GetFileName(additionalFile);
-                filesToZip.Add((additionalFile, fileName));
-            }
-        }
+        filesToZip.AddRange(GetLogFilesToZip(fileProvider));
+        filesToZip.AddRange(GetAdditionalFilesToZip(fileProvider, profile));
 
         return filesToZip;
+    }
+
+    private IEnumerable<(string Path, string Name)> GetLogFilesToZip(IFileProvider fileProvider)
+    {
+        return fileProvider.GetFiles()
+            .Where(f => Path.GetFileNameWithoutExtension(f).EndsWith("_log", true, CultureInfo.InvariantCulture))
+            .Select(f => (Path: Path.Combine(fileProvider.HomeDirectory.FullName, f), Name: $"log{Path.GetExtension(f)}"));
+    }
+
+    private IEnumerable<(string Path, string Name)> GetAdditionalFilesToZip(IFileProvider fileProvider, Profile profile)
+    {
+        var additionalFilesDirPath = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.AdditionalFilesFolderName);
+
+        if (!Directory.Exists(additionalFilesDirPath))
+            return Enumerable.Empty<(string Path, string Name)>();
+
+        return Directory.GetFiles(additionalFilesDirPath)
+            .Select(f => (Path: f, Name: Path.GetFileName(f)));
     }
 }
