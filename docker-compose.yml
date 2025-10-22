@@ -159,7 +159,7 @@ services:
     ports:
       - "8380:80"
     volumes:
-      - ./data/Uploads:/uploads
+      - ./data/Uploads:/uploads:ro
     environment:
       - QGIS_SERVER_LOG_LEVEL=0  # INFO (log all requests)
       - DEBUG=1                  # display env before spawning QGIS Server

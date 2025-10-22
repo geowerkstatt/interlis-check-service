@@ -1,4 +1,5 @@
 ﻿using Geowerkstatt.Ilicop.Web.Ilitools;
+using Geowerkstatt.Ilicop.Web.ReverseProxy;
 using Geowerkstatt.Ilicop.Web.Services;
 using Geowerkstatt.Interlis.RepositoryCrawler;
 using Microsoft.AspNetCore.Builder;
@@ -140,7 +141,9 @@ namespace Geowerkstatt.Ilicop.Web
                 configuration.RootPath = "ClientApp/build";
             });
 
-            services.AddReverseProxy().LoadFromConfig(Configuration.GetSection("ReverseProxy"));
+            services.AddReverseProxy()
+                .AddTransformFactory<QueryRouteValuesTransformFactory>()
+                .LoadFromConfig(Configuration.GetSection("ReverseProxy"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
