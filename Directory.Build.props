@@ -14,7 +14,7 @@
     <RootNamespace>Geowerkstatt.Ilicop.Web</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectExtension)' != '.dcproj' And '$(MSBuildProjectExtension)' != '.esproj'">
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
