@@ -50,7 +50,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             ArgumentNullException.ThrowIfNull(request);
             if (!ilitoolsEnvironment.IsIli2GpkgInitialized) throw new InvalidOperationException("ili2gpkg is not properly initialized.");
 
-            logger.LogInformation("Starting import of <{TransferFile}> using ili2gpkg.", request.FilePath);
+            logger.LogInformation("Starting import of <{TransferFile}> into <{GeoPackageFile}> using ili2gpkg.", request.FilePath, request.DbFilePath);
 
             try
             {
