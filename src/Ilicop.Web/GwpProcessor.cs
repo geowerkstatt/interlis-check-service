@@ -1,6 +1,5 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
 using Geowerkstatt.Ilicop.Web.Ilitools;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -11,6 +10,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Geowerkstatt.Ilicop.Web;
 
@@ -49,37 +49,40 @@ public class GwpProcessor : IProcessor
             return;
         }
 
-        await CreateGpkg(jobId, transferFile, profile, cancellationToken);
+        fileProvider.Initialize(jobId);
+
+        if (TryCopyTemplateGpkg(profile, out var dataGpkgFilePath))
+        {
+            await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile, profile, cancellationToken);
+            await ImportLogToGpkg(fileProvider, dataGpkgFilePath, profile, cancellationToken);
+        }
+        else
+        {
+            logger.LogWarning("No data GeoPackage file found at <{GpkgFilePath}> for profile <{ProfileId}>. Skipping GWP GeoPackage creation for job <{JobId}>.", dataGpkgFilePath, profile.Id, jobId);
+        }
+
         CreateZip(jobId, profile);
     }
 
-    private async Task CreateGpkg(Guid jobId, string transferFile, Profile profile, CancellationToken cancellationToken)
+    private bool TryCopyTemplateGpkg(Profile profile, out string dataGpkgFilePath)
     {
-        var dataGpkgFilePath = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.DataGpkgFileName);
+        var templateGpkgFilePath = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.DataGpkgFileName);
 
-        if (!File.Exists(dataGpkgFilePath))
+        if (!File.Exists(templateGpkgFilePath))
         {
-            logger.LogWarning("No data GeoPackage file found at <{GpkgFilePath}> for profile <{ProfileId}>. Skipping GWP GeoPackage creation for job <{JobId}>.", dataGpkgFilePath, profile.Id, jobId);
-            return;
+            dataGpkgFilePath = null;
+            return false;
         }
 
-        fileProvider.Initialize(jobId);
-        var destGpkgFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, gwpProcessorOptions.DataGpkgFileName);
+        dataGpkgFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, gwpProcessorOptions.DataGpkgFileName);
 
-        using (var destGpkgFileStream = fileProvider.CreateFile(destGpkgFilePath))
-        using (var sourceGpkgFileStream = File.OpenRead(dataGpkgFilePath))
+        using (var destGpkgFileStream = fileProvider.CreateFile(dataGpkgFilePath))
+        using (var sourceGpkgFileStream = File.OpenRead(templateGpkgFilePath))
         {
             sourceGpkgFileStream.CopyTo(destGpkgFileStream);
         }
 
-        var transferFileImportExitCode = await ImportTransferFileToGpkg(fileProvider, destGpkgFilePath, transferFile, profile, cancellationToken);
-        var logFileImportExitCode = await ImportLogToGpkg(fileProvider, destGpkgFilePath, profile, cancellationToken);
-
-        if (transferFileImportExitCode != 0 || logFileImportExitCode != 0)
-        {
-            logger.LogInformation("Data could not be imported into GeoPackage for job <{JobId}>.", jobId);
-            File.Delete(destGpkgFilePath);
-        }
+        return true;
     }
 
     private async Task<int> ImportLogToGpkg(IFileProvider fileProvider, string gpkgFilePath, Profile profile, CancellationToken cancellationToken)
@@ -117,7 +120,7 @@ public class GwpProcessor : IProcessor
     {
         logger.LogInformation("Creating ZIP for job <{JobId}>.", jobId);
 
-        var filesToZip = GetFilesToZip(jobId, profile);
+        var filesToZip = GetFilesToZip(profile);
 
         var zipFileStream = fileProvider.CreateFile(gwpProcessorOptions.ZipFileName);
         using (var archive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
@@ -132,10 +135,8 @@ public class GwpProcessor : IProcessor
         logger.LogInformation("Successfully created ZIP for job <{JobId}>.", jobId);
     }
 
-    private List<(string Path, string Name)> GetFilesToZip(Guid jobId, Profile profile)
+    private List<(string Path, string Name)> GetFilesToZip(Profile profile)
     {
-        fileProvider.Initialize(jobId);
-
         var filesToZip = new List<(string Path, string Name)>();
         filesToZip.AddRange(GetLogFilesToZip(fileProvider));
         filesToZip.AddRange(GetAdditionalFilesToZip(fileProvider, profile));
