@@ -1,5 +1,6 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
 using Geowerkstatt.Ilicop.Web.Ilitools;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -10,7 +11,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Geowerkstatt.Ilicop.Web;
 
@@ -55,6 +55,9 @@ public class GwpProcessor : IProcessor
         {
             await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile, profile, cancellationToken);
             await ImportLogToGpkg(fileProvider, dataGpkgFilePath, profile, cancellationToken);
+
+            if (IsTranslationNeeded(dataGpkgFilePath))
+                await CreateTranslatedTransferFile(dataGpkgFilePath, profile, cancellationToken);
         }
         else
         {
@@ -62,6 +65,33 @@ public class GwpProcessor : IProcessor
         }
 
         CreateZip(jobId, profile);
+    }
+
+    private async Task CreateTranslatedTransferFile(string gpkgPath, Profile profile, CancellationToken cancellationToken)
+    {
+        var outputFileName = "translated.xtf";
+        var outputFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, outputFileName);
+
+        var exportRequest = new ExportRequest
+        {
+            FileName = outputFileName,
+            FilePath = outputFilePath,
+            Profile = profile,
+            DbFilePath = gpkgPath,
+            Dataset = "Data",
+        };
+
+        await ilitoolsExecutor.ExportFromGpkgAsync(exportRequest, cancellationToken);
+    }
+
+    private bool IsTranslationNeeded(string gpkgPath)
+    {
+        var modelNames = GetColumnFromSqliteTable(gpkgPath, "T_ILI2DB_MODEL", "modelName").Select(r => r.ToString()).ToList();
+        var topics = GetColumnFromSqliteTable(gpkgPath, "T_ILI2DB_BASKET", "topic").Select(r => r.ToString()).ToList();
+
+        SqliteConnection.ClearAllPools(); // Required because otherwise the database file remains locked
+
+        return topics.Select(n => n.Split('.')[0]).Any(x => modelNames.All(n => !n.Contains(x)));
     }
 
     private bool TryCopyTemplateGpkg(Profile profile, out string dataGpkgFilePath)
@@ -96,6 +126,7 @@ public class GwpProcessor : IProcessor
             FileName = logFileName,
             DbFilePath = gpkgFilePath,
             Profile = profile,
+            Dataset = "Logs",
         };
 
         return await ilitoolsExecutor.ImportToGpkgAsync(logFileImportRequest, cancellationToken).ConfigureAwait(false);
@@ -111,6 +142,7 @@ public class GwpProcessor : IProcessor
             FileName = transferFile,
             DbFilePath = gpkgFilePath,
             Profile = profile,
+            Dataset = "Data",
         };
 
         return await ilitoolsExecutor.ImportToGpkgAsync(transferFileImportRequest, cancellationToken).ConfigureAwait(false);
@@ -144,9 +176,12 @@ public class GwpProcessor : IProcessor
         // Add GeoPackage if exists
         var gpkgFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, gwpProcessorOptions.DataGpkgFileName);
         if (File.Exists(gpkgFilePath))
-        {
             filesToZip.Add((gpkgFilePath, gwpProcessorOptions.DataGpkgFileName));
-        }
+
+        // Add translated transfer file if exists
+        var translatedTransferFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, "translated.xtf");
+        if (File.Exists(translatedTransferFilePath))
+            filesToZip.Add((translatedTransferFilePath, "translated.xtf"));
 
         return filesToZip;
     }
@@ -167,5 +202,23 @@ public class GwpProcessor : IProcessor
 
         return Directory.GetFiles(additionalFilesDirPath)
             .Select(f => (Path: f, Name: Path.GetFileName(f)));
+    }
+
+    private IEnumerable<object> GetColumnFromSqliteTable(string dbFilePath, string tableName, string columnName)
+    {
+        var connectionString = $"Data Source={dbFilePath}";
+        using var connection = new SqliteConnection(connectionString);
+        connection.Open();
+
+        using var command = connection.CreateCommand();
+#pragma warning disable CA2100
+        command.CommandText = $"SELECT [{columnName}] FROM [{tableName}]";
+#pragma warning restore CA2100
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            yield return reader.GetValue(0);
+        }
     }
 }

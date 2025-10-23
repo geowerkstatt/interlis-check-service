@@ -8,4 +8,6 @@ public class ImportRequest : IlitoolsRequest
     /// Gets or sets the full path to the database file to import data into.
     /// </summary>
     public required string DbFilePath { get; init; }
+
+    public required string Dataset { get; init; }
 }
