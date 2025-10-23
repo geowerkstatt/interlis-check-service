@@ -75,7 +75,7 @@ public class GwpProcessor : IProcessor
         var transferFileImportExitCode = await ImportTransferFileToGpkg(fileProvider, destGpkgFilePath, transferFile, profile, cancellationToken);
         var logFileImportExitCode = await ImportLogToGpkg(fileProvider, destGpkgFilePath, profile, cancellationToken);
 
-        if (transferFileImportExitCode + logFileImportExitCode != 0)
+        if (transferFileImportExitCode != 0 || logFileImportExitCode != 0)
         {
             logger.LogInformation("Data could not be imported into GeoPackage for job <{JobId}>.", jobId);
             File.Delete(destGpkgFilePath);
