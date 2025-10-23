@@ -211,6 +211,8 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 $"\"{ilitoolsEnvironment.Ili2GpkgPath}\"",
                 "--import",
                 "--disableValidation",
+                "--skipReferenceErrors",
+                "--skipGeometryErrors",
                 $"--dbfile \"{request.DbFilePath}\"",
             };
 
