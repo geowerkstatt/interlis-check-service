@@ -37,7 +37,7 @@ jobs:
         run: dotnet build Ilicop.sln -c Release --no-restore
 
       - name: Test
-        run: dotnet test
+        run: dotnet test Ilicop.sln
 
       - name: Build frontend
         working-directory: ./src/Ilicop.Web/ClientApp
