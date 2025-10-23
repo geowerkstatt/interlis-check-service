@@ -43,7 +43,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         }
 
         /// <summary>
-        /// Imports an INTERLIS data file into an existing GeoPackage using the ili2gpkg tool.
+        /// Imports an INTERLIS transfer file (.xtf or .itf) into an existing GeoPackage using the ili2gpkg tool.
         /// </summary>
         public async Task<int> ImportToGpkgAsync(ImportRequest request, CancellationToken cancellationToken)
         {
