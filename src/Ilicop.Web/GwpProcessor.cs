@@ -57,25 +57,24 @@ public class GwpProcessor : IProcessor
             await ImportLogToGpkg(fileProvider, dataGpkgFilePath, profile, cancellationToken);
 
             if (IsTranslationNeeded(dataGpkgFilePath))
-                await CreateTranslatedTransferFile(dataGpkgFilePath, profile, cancellationToken);
+                await CreateTranslatedTransferFile(dataGpkgFilePath, transferFile, profile, cancellationToken);
         }
         else
         {
             logger.LogWarning("No data GeoPackage file found at <{GpkgFilePath}> for profile <{ProfileId}>. Skipping GWP GeoPackage creation for job <{JobId}>.", dataGpkgFilePath, profile.Id, jobId);
         }
 
-        CreateZip(jobId, profile);
+        CreateZip(jobId, transferFile, profile);
     }
 
-    private async Task CreateTranslatedTransferFile(string gpkgPath, Profile profile, CancellationToken cancellationToken)
+    private async Task CreateTranslatedTransferFile(string gpkgPath, NamedFile transferFile, Profile profile, CancellationToken cancellationToken)
     {
-        var outputFileName = "translated.xtf";
-        var outputFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, outputFileName);
+        var translatedTransferFile = GetTranslatedTransferFile(transferFile);
 
         var exportRequest = new ExportRequest
         {
-            FileName = outputFileName,
-            FilePath = outputFilePath,
+            FileName = translatedTransferFile.FileName,
+            FilePath = translatedTransferFile.FilePath,
             Profile = profile,
             DbFilePath = gpkgPath,
             Dataset = "Data",
@@ -148,11 +147,11 @@ public class GwpProcessor : IProcessor
         return await ilitoolsExecutor.ImportToGpkgAsync(transferFileImportRequest, cancellationToken).ConfigureAwait(false);
     }
 
-    private void CreateZip(Guid jobId, Profile profile)
+    private void CreateZip(Guid jobId, NamedFile transferFile, Profile profile)
     {
         logger.LogInformation("Creating ZIP for job <{JobId}>.", jobId);
 
-        var filesToZip = GetFilesToZip(profile);
+        var filesToZip = GetFilesToZip(transferFile, profile);
 
         var zipFileStream = fileProvider.CreateFile(gwpProcessorOptions.ZipFileName);
         using (var archive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
@@ -167,7 +166,7 @@ public class GwpProcessor : IProcessor
         logger.LogInformation("Successfully created ZIP for job <{JobId}>.", jobId);
     }
 
-    private List<NamedFile> GetFilesToZip(Profile profile)
+    private List<NamedFile> GetFilesToZip(NamedFile transferFile, Profile profile)
     {
         var filesToZip = new List<NamedFile>();
         filesToZip.AddRange(GetLogFilesToZip(fileProvider));
@@ -179,9 +178,9 @@ public class GwpProcessor : IProcessor
             filesToZip.Add(new NamedFile(gpkgFilePath, gwpProcessorOptions.DataGpkgFileName));
 
         // Add translated transfer file if exists
-        var translatedTransferFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, "translated.xtf");
-        if (File.Exists(translatedTransferFilePath))
-            filesToZip.Add(new NamedFile(translatedTransferFilePath, "translated.xtf"));
+        var translatedTransferFile = GetTranslatedTransferFile(transferFile);
+        if (File.Exists(translatedTransferFile.FilePath))
+            filesToZip.Add(translatedTransferFile);
 
         return filesToZip;
     }
@@ -220,5 +219,14 @@ public class GwpProcessor : IProcessor
         {
             yield return reader.GetValue(0);
         }
+    }
+
+    private NamedFile GetTranslatedTransferFile(NamedFile transferFile)
+    {
+        var suffix = "_translated.xtf";
+        var fileName = $"{Path.GetFileNameWithoutExtension(transferFile.FileName)}{suffix}";
+        var displayName = $"{Path.GetFileNameWithoutExtension(transferFile.DisplayName)}{suffix}";
+        var path = Path.Combine(fileProvider.HomeDirectory.FullName, fileName);
+        return new NamedFile(path, displayName);
     }
 }
