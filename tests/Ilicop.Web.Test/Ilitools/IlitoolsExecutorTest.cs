@@ -123,11 +123,12 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 FilePath = "/import/path/import.gpkg",
                 DbFilePath = "/import/path/import.gpkg",
                 Profile = new Profile { Id = "DEFAULT" },
+                Dataset = "Data",
             };
 
             var command = ilitoolsExecutor.CreateIli2GpkgImportCommand(request);
 
-            var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --import --disableValidation --skipReferenceErrors --skipGeometryErrors --dbfile \"{request.DbFilePath}\" --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:{request.Profile.Id}\" \"{request.FilePath}\"";
+            var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --import --disableValidation --skipReferenceErrors --skipGeometryErrors --dataset \"{request.Dataset}\" --dbfile \"{request.DbFilePath}\" --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:{request.Profile.Id}\" \"{request.FilePath}\"";
             Assert.AreEqual(expected, command);
         }
 
