@@ -1,6 +1,2 @@
 [ch.ehi.ilivalidator]
 allObjectsAccessible=true
-
-[ch.ehi.ili2db]
-skipReferenceErrors=true
-skipGeometryErrors=true
