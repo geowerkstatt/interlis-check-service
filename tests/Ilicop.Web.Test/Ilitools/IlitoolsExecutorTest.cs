@@ -132,6 +132,24 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             Assert.AreEqual(expected, command);
         }
 
+        [TestMethod]
+        public void CreateIli2GpkgExportCommand()
+        {
+            var request = new ExportRequest
+            {
+                FileName = "export.xtf",
+                FilePath = "/export/path/export.gpkg",
+                DbFilePath = "/export/path/export.gpkg",
+                Profile = new Profile { Id = "DEFAULT" },
+                Dataset = "Data",
+            };
+
+            var command = ilitoolsExecutor.CreateIli2GpkgExportCommand(request);
+
+            var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --export --disableValidation --skipReferenceErrors --skipGeometryErrors --dataset \"{request.Dataset}\" --dbfile \"{request.DbFilePath}\" --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:{request.Profile.Id}\" \"{request.FilePath}\"";
+            Assert.AreEqual(expected, command);
+        }
+
         private void AssertIlivalidatorCommandContains(string homeDirectory, string transferFile, string modelNames)
         {
             var request = CreateValidationRequest(homeDirectory, transferFile, modelNames);
