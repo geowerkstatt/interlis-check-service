@@ -41,7 +41,7 @@ public class GwpProcessor : IProcessor
     }
 
     /// <inheritdoc />
-    public async Task Run(Guid jobId, string transferFile, Profile profile, CancellationToken cancellationToken)
+    public async Task Run(Guid jobId, NamedFile transferFile, Profile profile, CancellationToken cancellationToken)
     {
         if (configDir == null || !Directory.Exists(Path.Combine(configDir.FullName, profile.Id)))
         {
@@ -53,7 +53,7 @@ public class GwpProcessor : IProcessor
 
         if (TryCopyTemplateGpkg(profile, out var dataGpkgFilePath))
         {
-            await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile, profile, cancellationToken);
+            await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile.FileName, profile, cancellationToken);
             await ImportLogToGpkg(fileProvider, dataGpkgFilePath, profile, cancellationToken);
 
             if (IsTranslationNeeded(dataGpkgFilePath))
@@ -159,49 +159,49 @@ public class GwpProcessor : IProcessor
         {
             foreach (var fileToZip in filesToZip)
             {
-                archive.CreateEntryFromFile(fileToZip.Path, fileToZip.Name, CompressionLevel.Optimal);
-                logger.LogTrace("Added file <{FileName}> to ZIP for job <{JobId}>", fileToZip.Name, jobId);
+                archive.CreateEntryFromFile(fileToZip.FilePath, fileToZip.DisplayName, CompressionLevel.Optimal);
+                logger.LogTrace("Added file <{FileName}> to ZIP for job <{JobId}>", fileToZip.DisplayName, jobId);
             }
         }
 
         logger.LogInformation("Successfully created ZIP for job <{JobId}>.", jobId);
     }
 
-    private List<(string Path, string Name)> GetFilesToZip(Profile profile)
+    private List<NamedFile> GetFilesToZip(Profile profile)
     {
-        var filesToZip = new List<(string Path, string Name)>();
+        var filesToZip = new List<NamedFile>();
         filesToZip.AddRange(GetLogFilesToZip(fileProvider));
         filesToZip.AddRange(GetAdditionalFilesToZip(fileProvider, profile));
 
         // Add GeoPackage if exists
         var gpkgFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, gwpProcessorOptions.DataGpkgFileName);
         if (File.Exists(gpkgFilePath))
-            filesToZip.Add((gpkgFilePath, gwpProcessorOptions.DataGpkgFileName));
+            filesToZip.Add(new NamedFile(gpkgFilePath, gwpProcessorOptions.DataGpkgFileName));
 
         // Add translated transfer file if exists
         var translatedTransferFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, "translated.xtf");
         if (File.Exists(translatedTransferFilePath))
-            filesToZip.Add((translatedTransferFilePath, "translated.xtf"));
+            filesToZip.Add(new NamedFile(translatedTransferFilePath, "translated.xtf"));
 
         return filesToZip;
     }
 
-    private IEnumerable<(string Path, string Name)> GetLogFilesToZip(IFileProvider fileProvider)
+    private IEnumerable<NamedFile> GetLogFilesToZip(IFileProvider fileProvider)
     {
         return fileProvider.GetFiles()
             .Where(f => Path.GetFileNameWithoutExtension(f).EndsWith("_log", true, CultureInfo.InvariantCulture))
-            .Select(f => (Path: Path.Combine(fileProvider.HomeDirectory.FullName, f), Name: $"log{Path.GetExtension(f)}"));
+            .Select(f => new NamedFile(Path.Combine(fileProvider.HomeDirectory.FullName, f), $"log{Path.GetExtension(f)}"));
     }
 
-    private IEnumerable<(string Path, string Name)> GetAdditionalFilesToZip(IFileProvider fileProvider, Profile profile)
+    private IEnumerable<NamedFile> GetAdditionalFilesToZip(IFileProvider fileProvider, Profile profile)
     {
         var additionalFilesDirPath = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.AdditionalFilesFolderName);
 
         if (!Directory.Exists(additionalFilesDirPath))
-            return Enumerable.Empty<(string Path, string Name)>();
+            return Enumerable.Empty<NamedFile>();
 
         return Directory.GetFiles(additionalFilesDirPath)
-            .Select(f => (Path: f, Name: Path.GetFileName(f)));
+            .Select(f => new NamedFile(f));
     }
 
     private IEnumerable<object> GetColumnFromSqliteTable(string dbFilePath, string tableName, string columnName)

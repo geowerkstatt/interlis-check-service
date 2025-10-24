@@ -147,14 +147,18 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                     validator.Id,
                     async cancellationToken =>
                     {
+                        var namedTransferFile = new NamedFile(
+                            Path.Combine(fileProvider.HomeDirectory.FullName, transferFile),
+                            file.FileName);
+
                         try
                         {
                             await validator.ExecuteAsync(transferFile, foundProfile, cancellationToken);
-                            await processor.Run(validator.Id, transferFile, foundProfile, cancellationToken);
+                            await processor.Run(validator.Id, namedTransferFile, foundProfile, cancellationToken);
                         }
                         catch (ValidationFailedException)
                         {
-                            await processor.Run(validator.Id, transferFile, foundProfile, cancellationToken);
+                            await processor.Run(validator.Id, namedTransferFile, foundProfile, cancellationToken);
                             throw;
                         }
                     });
