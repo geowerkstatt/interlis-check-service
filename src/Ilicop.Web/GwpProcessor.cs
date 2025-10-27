@@ -85,12 +85,18 @@ public class GwpProcessor : IProcessor
 
     private bool IsTranslationNeeded(string gpkgPath)
     {
-        var modelNames = GetColumnFromSqliteTable(gpkgPath, "T_ILI2DB_MODEL", "modelName").Select(r => r.ToString()).ToList();
-        var topics = GetColumnFromSqliteTable(gpkgPath, "T_ILI2DB_BASKET", "topic").Select(r => r.ToString()).ToList();
+        var models = GetColumnFromSqliteTable(gpkgPath, "T_ILI2DB_MODEL", "modelName").Select(m => m.ToString());
+        var topics = GetColumnFromSqliteTable(gpkgPath, "T_ILI2DB_BASKET", "topic").Select(m => m.ToString());
 
-        SqliteConnection.ClearAllPools(); // Required because otherwise the database file remains locked
+        return GetBasketTopicsNotInModels(topics, models).Any();
+    }
 
-        return topics.Select(n => n.Split('.')[0]).Any(x => modelNames.All(n => !n.Contains(x)));
+    internal IEnumerable<string> GetBasketTopicsNotInModels(IEnumerable<string> topics, IEnumerable<string> models)
+    {
+        var splitModels = models.SelectMany(r => r.Replace("{", "").Replace("}", "").Split(' ')).Distinct().ToList();
+        var importedBasketsModel = topics.Select(r => r.Split('.')[0]).Distinct().ToList();
+
+        return importedBasketsModel.Except(splitModels);
     }
 
     private bool TryCopyTemplateGpkg(Profile profile, out string dataGpkgFilePath)
@@ -219,6 +225,8 @@ public class GwpProcessor : IProcessor
         {
             yield return reader.GetValue(0);
         }
+
+        SqliteConnection.ClearAllPools();
     }
 
     private NamedFile GetTranslatedTransferFile(NamedFile transferFile)
