@@ -53,11 +53,19 @@ public class GwpProcessor : IProcessor
 
         if (TryCopyTemplateGpkg(profile, out var dataGpkgFilePath))
         {
-            await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile.FileName, profile, cancellationToken);
-            await ImportLogToGpkg(fileProvider, dataGpkgFilePath, profile, cancellationToken);
+            var importTransferFileExitCode = await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile.FileName, profile, cancellationToken);
+            var importLogTransferFileExitCode = await ImportLogToGpkg(fileProvider, dataGpkgFilePath, profile, cancellationToken);
 
-            if (IsTranslationNeeded(dataGpkgFilePath))
-                await CreateTranslatedTransferFile(dataGpkgFilePath, transferFile, profile, cancellationToken);
+            if (importLogTransferFileExitCode == 0 && importTransferFileExitCode == 0)
+            {
+                if (IsTranslationNeeded(dataGpkgFilePath))
+                    await CreateTranslatedTransferFile(dataGpkgFilePath, transferFile, profile, cancellationToken);
+            }
+            else
+            {
+                File.Delete(dataGpkgFilePath);
+                logger.LogWarning("Importing transfer file or log file to GeoPackage failed for profile <{ProfileId}>. Deleting GeoPackage again for job <{JobId}>.", profile.Id, jobId);
+            }
         }
         else
         {
