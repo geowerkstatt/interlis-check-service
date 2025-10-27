@@ -171,6 +171,33 @@ services:
       - 3080:8080
 ```
 
+## GWP Konfiguration
+
+Um den INTERLIS Web-Check-Service für GWP zu konfigurieren muss ein Config-Ordner mit folgender Struktur erstellt werden:
+<pre>
+{ConfigDir}
+├───example_profile1
+|   ├───{DataGpkgFileName}
+│   └───{AdditionalFilesFolderName}
+│       └───...
+├───example_profile2
+│   └───...
+</pre>
+
+- `{ConfigDir}`:<br>Ordner für die GWP Konfiguration. Enthält für jedes Profil einen eigenen Unterordner.
+- `{DataGpkgFileName}`:<br>Template GeoPackage Datei für das jeweilige Profil. Es muss das Schema für die benötigten INTERLIS Modelle enthalten.
+- `{AdditionalFilesFolderName}`:<br>Optionaler Ordner für zusätzliche Dateien, die für das jeweilige Profil im ZIP ausgeliefert werden sollen.
+
+Die Pfade, Namen und Weiteres können im `appsettings.json` konfiguriert werden:
+```javascript
+"GwpProcessor": {
+    "ConfigDir": "" // optional
+    "DataGpkgFileName": "", // default: "data.gpkg"
+    "AdditionalFilesFolderName": "" // default: "AdditionalFiles"
+    "ZipOutputFileName": "" // default: "gwp_results_log.zip". Interner Name der ZIP Datei, welche für jeden Job erstellt wird.
+}
+```
+
 ## Individuelle Anpassung
 
 Der INTERLIS Web-Check-Service kann in folgenden Bereichen individuell an eigene Bedürfnisse angepasst werden. Dies erfolgt entweder über das Setzen von Umgebungsvariablen oder über zusätzliche Dateien beim Starten des Docker-Containers. Eine ausführliche Beschreibung befindet sich in der oben aufgeführten [docker-compose.yml](#docker-composeyml) Beispielkonfiguration.
