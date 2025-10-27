@@ -210,11 +210,12 @@ namespace Geowerkstatt.Ilicop.Web
 
             var request = new ValidationRequest
             {
-                TransferFileName = transferFile,
-                TransferFilePath = transferFilePath,
+                FileName = transferFile,
+                FilePath = transferFilePath,
                 LogFilePath = logPath,
                 XtfLogFilePath = xtfLogPath,
                 CsvLogFilePath = csvLogPath,
+                VerboseLogging = true,
                 GpkgModelNames = GpkgModelNames,
                 AdditionalCatalogueFilePaths = xmlCatalogFiles,
                 Profile = profile,

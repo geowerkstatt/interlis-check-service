@@ -28,6 +28,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         private readonly IConfiguration configuration;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IValidator validator;
+        private readonly IProcessor processor;
         private readonly IFileProvider fileProvider;
         private readonly IValidatorService validatorService;
         private readonly IProfileService profileService;
@@ -37,6 +38,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor,
             IValidator validator,
+            IProcessor processor,
             IFileProvider fileProvider,
             IValidatorService validatorService,
             IProfileService profileService)
@@ -45,6 +47,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             this.configuration = configuration;
             this.httpContextAccessor = httpContextAccessor;
             this.validator = validator;
+            this.processor = processor;
             this.fileProvider = fileProvider;
             this.validatorService = validatorService;
             this.profileService = profileService;
@@ -141,7 +144,20 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
                 // Add validation job to queue.
                 await validatorService.EnqueueJobAsync(
-                    validator.Id, cancellationToken => validator.ExecuteAsync(transferFile, foundProfile, cancellationToken));
+                    validator.Id,
+                    async cancellationToken =>
+                    {
+                        try
+                        {
+                            await validator.ExecuteAsync(transferFile, foundProfile, cancellationToken);
+                            await processor.Run(validator.Id, transferFile, foundProfile, cancellationToken);
+                        }
+                        catch (ValidationFailedException)
+                        {
+                            await processor.Run(validator.Id, transferFile, foundProfile, cancellationToken);
+                            throw;
+                        }
+                    });
 
                 logger.LogInformation("Job with id <{JobId}> is scheduled for execution.", validator.Id);
 

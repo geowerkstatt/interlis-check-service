@@ -27,6 +27,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         private Mock<ApiVersion> apiVersionMock;
         private Mock<IFormFile> formFileMock;
         private Mock<IValidatorService> validatorServiceMock;
+        private Mock<IProcessor> processorMock;
         private Mock<IProfileService> profileServiceMock;
         private UploadController controller;
 
@@ -40,6 +41,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             validatorMock = new Mock<IValidator>(MockBehavior.Strict);
             fileProviderMock = new Mock<PhysicalFileProvider>(MockBehavior.Strict, CreateConfiguration(), "ILICOP_UPLOADS_DIR");
             validatorServiceMock = new Mock<IValidatorService>(MockBehavior.Strict);
+            processorMock = new Mock<IProcessor>(MockBehavior.Strict);
             profileServiceMock = new Mock<IProfileService>(MockBehavior.Strict);
             formFileMock = new Mock<IFormFile>(MockBehavior.Strict);
             apiVersionMock = new Mock<ApiVersion>(MockBehavior.Strict, 9, 88);
@@ -51,6 +53,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                 CreateConfiguration(),
                 httpContextAccessorMock.Object,
                 validatorMock.Object,
+                processorMock.Object,
                 fileProviderMock.Object,
                 validatorServiceMock.Object,
                 profileServiceMock.Object);
