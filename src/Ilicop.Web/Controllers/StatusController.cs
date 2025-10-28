@@ -1,4 +1,5 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
+using Geowerkstatt.Ilicop.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -23,23 +24,20 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         private readonly IValidatorService validatorService;
         private readonly IFileProvider fileProvider;
         private readonly IOptions<GwpProcessorOptions> gwpProcessorOptions;
-        private readonly IProxyStateLookup proxyState;
-        private readonly TemplateBinderFactory templateBinderFactory;
+        private readonly IMapServiceUriGenerator mapServiceUriGenerator;
 
         public StatusController(
             ILogger<StatusController> logger,
             IValidatorService validatorService,
             IFileProvider fileProvider,
             IOptions<GwpProcessorOptions> gwpProcessorOptions,
-            IProxyStateLookup proxyState,
-            TemplateBinderFactory templateBinderFactory)
+            IMapServiceUriGenerator mapServiceUriGenerator)
         {
             this.logger = logger;
             this.validatorService = validatorService;
             this.fileProvider = fileProvider;
             this.gwpProcessorOptions = gwpProcessorOptions;
-            this.proxyState = proxyState;
-            this.templateBinderFactory = templateBinderFactory;
+            this.mapServiceUriGenerator = mapServiceUriGenerator;
         }
 
         /// <summary>
@@ -82,31 +80,17 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         }
 
         /// <summary>
-        /// Gets the map service URL for the specified <paramref name="jobId"/> if any a service is available.
+        /// Gets the map service URL for the specified <paramref name="jobId"/> if service definition file is available.
         /// </summary>
         /// <param name="jobId"></param>
         /// <param name="fileProvider"></param>
-        /// <returns>Relative Url of the configured QGIS server proxy route.</returns>
+        /// <returns>Relative url of the configured QGIS server proxy route.</returns>
         private Uri GetMapServiceUrl(Guid jobId, IFileProvider fileProvider)
         {
             if (!fileProvider.Exists(gwpProcessorOptions.Value.QgisProjectFileName))
                 return null;
 
-            if (!proxyState.TryGetRoute("validationMapserverRoute", out var route) || string.IsNullOrEmpty(route.Config.Match.Path))
-                return null;
-
-            var template = TemplateParser.Parse(route.Config.Match.Path);
-            if (!template.Parameters.Any(p => p.Name.Equals("jobId", StringComparison.OrdinalIgnoreCase)))
-                return null;
-
-            var templateBinder = templateBinderFactory.Create(template, new());
-            var values = new RouteValueDictionary
-            {
-                { "jobId", jobId.ToString() },
-            };
-            var parameterizedRoute = templateBinder.BindValues(values);
-
-            return string.IsNullOrEmpty(parameterizedRoute) ? null : new Uri(parameterizedRoute, UriKind.Relative);
+            return mapServiceUriGenerator.BuildMapServiceUri(jobId);
         }
 
         /// <summary>

@@ -146,6 +146,9 @@ namespace Geowerkstatt.Ilicop.Web
             services.AddReverseProxy()
                 .AddTransformFactory<QueryRouteValuesTransformFactory>()
                 .LoadFromConfig(Configuration.GetSection("ReverseProxy"));
+
+            services.AddTransient<IMapServiceUriGenerator, MapServiceUriGenerator>();
+            services.Configure<MapServiceUriGenerationParameters>(Configuration.GetSection("MapServiceGeneration"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
