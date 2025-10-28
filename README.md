@@ -207,6 +207,151 @@ Der INTERLIS Web-Check-Service ist seit Version 3 vollständig über eine REST A
 
 ![REST API Schnittstellenbeschreibung](./assets/ILICOP_rest_api.png)
 
+## Konfiguration von Prüfprofilen
+
+Seit der Version 5 unterstützt der INTERLIS Web-Check-Service sogenannte Prüfprofile. Prüfprofile ermöglichen, dass ein Transferfile gegenüber einem spezifischen Set von Regeln geprüft wird:
+![Profilauswahl](ilicheck_app_screenshot_profile.png)
+
+Die eigentliche Validierungen werden nativ mittels INTERLIS beschrieben. Dazu können bestehende Modelldefinitionen ergänzt oder mittels sogenannter Validierungsmodelle erweitert werden. 
+Folgende Dokumentationen beschreiben diese Möglichkeit für die Nutzung mit ilivalidator:
+
+![Workshop 'Datenqualität und INTERLIS: ilivalidator nutzen und verstehen'](https://github.com/moflexch/awt3_validierung/tree/main/ws1)
+![Workshop 'Fortgeschrittene Datenvalidierung mittels ilivalidator und Validierungsmodellen/Konsistenzbedingungen'](https://github.com/moflexch/awt3_validierung/tree/main/ws2)
+
+Die so erstellten Konfigurationen stellen die Basis für die Integration im INTERLIS Web-Check-Service dar.
+
+### ilidata.xml Konfiguration
+
+Die Datei ilidata.xml stellt den Einstiegspunkt für die Interpretation der zur Verfügung stehenden Profile dar. Dabei wird jedes Profil mittels einem Dataset vom Typ `http://codes.interlis.ch/type/metaconfig` konfiguriert. In der Folge wird die Konfiguration von zwei Profilen beschrieben:
+
+#### Default-Profil
+
+Der Profilsupport setzt voraus, dass eine profillose, modellunabhängige Validierung ("DEFAULT") deklariert wird, welche auf eine Datei default.ini zeigt:
+
+```xml
+<DatasetIdx16.DataIndex.DatasetMetadata TID="1">
+        <id>DEFAULT</id>
+        <title>
+          <DatasetIdx16.MultilingualText>
+            <LocalisedText>
+              <DatasetIdx16.LocalisedText>
+                <Text></Text>                <!--Do not give default Profile a display name-->
+              </DatasetIdx16.LocalisedText>
+            </LocalisedText>
+          </DatasetIdx16.MultilingualText>
+        </title>
+        <categories>
+          <DatasetIdx16.Code_>
+            <value>http://codes.interlis.ch/type/metaconfig</value>
+          </DatasetIdx16.Code_>
+        </categories>
+        <files>
+          <DatasetIdx16.DataFile>
+            <fileFormat>text/plain</fileFormat>
+            <file>
+              <DatasetIdx16.File>
+                <path>default.ini</path>
+              </DatasetIdx16.File>
+            </file>
+          </DatasetIdx16.DataFile>
+        </files>
+      </DatasetIdx16.DataIndex.DatasetMetadata>
+```
+
+Die referenzierte `default.ini`-Datei kann grundsätzliche Konfigurationen für Validierungen ohne konkretes Profil enthalten:
+
+```ini
+[ch.ehi.ilivalidator]
+allObjectsAccessible="true"
+```
+
+#### Spezifisches erweitertes Profil
+
+Die folgende Profildeklaration zeigt ein Beispiel, welches auf eine konkrete meta-Konfiguration zeigt und eine mehrsprachige Profilbeschreibung bietet:
+
+```xml
+      <DatasetIdx16.DataIndex.DatasetMetadata TID="2">
+        <id>DMAV_V1_0_Validierung-meta</id>
+        <version>current</version>
+        <owner>mailto:dmav@geow.ch</owner>
+        <title>
+          <DatasetIdx16.MultilingualText>
+            <LocalisedText>
+              <DatasetIdx16.LocalisedText>
+                <Language>de</Language>
+                <Text>DMAV mit Zusatzanforderungen</Text>
+              </DatasetIdx16.LocalisedText>
+              <DatasetIdx16.LocalisedText>
+                <Language>fr</Language>
+                <Text>DMAV avec des règles supplémentaires</Text>
+              </DatasetIdx16.LocalisedText>
+            </LocalisedText>
+          </DatasetIdx16.MultilingualText>
+        </title>
+        <categories>
+          <DatasetIdx16.Code_>
+            <value>http://codes.interlis.ch/type/metaconfig</value>
+          </DatasetIdx16.Code_>
+        </categories>
+        <files>
+          <DatasetIdx16.DataFile>
+            <fileFormat>text/plain</fileFormat>
+            <file>
+              <DatasetIdx16.File>
+                <path>DMAV_V1_0_Validierung-meta.ini</path>
+              </DatasetIdx16.File>
+            </file>
+          </DatasetIdx16.DataFile>
+        </files>
+      </DatasetIdx16.DataIndex.DatasetMetadata>
+    </DatasetIdx16.DataIndex>
+```
+
+Die hier referenzierte Meta-Konfiguration enthält einerseits eine Auflistung der akzeptierten Modelle (`models=`) sowie die Referenz auf eine ilidata-Konfiguration mittels der Angabe der Id aus dem ilidata.xml-File (`config=ilidata:<Id>`):
+
+```ini
+[ch.ehi.ilivalidator]
+models="DMAV_Bodenbedeckung_V1_0;DMAV_DauerndeBodenverschiebungen_V1_0;DMAV_Dienstbarkeitsgrenzen_V1_0;DMAV_Einzelobjekte_V1_0;DMAV_FixpunkteAVKategorie2_V1_0;DMAV_FixpunkteAVKategorie3_V1_0;DMAV_FixpunkteLV_V1_0;DMAV_Gebaeudeadressen_V1_0;DMAV_Grundstuecke_V1_0;DMAV_HoheitsgrenzenAV_V1_0;DMAV_HoheitsgrenzenLV_V1_0;DMAV_Nomenklatur_V1_0;DMAV_PLZ_Ortschaft_V1_0;DMAV_Rohrleitungen_V1_0;DMAV_Toleranzstufen_V1_0;DMAVSUP_UntereinheitGrundbuch_V1_0"
+config=ilidata:DMAV_V1_0_Validierung
+```
+
+Die über `config=` referenzierte Konfiguration liegt mit der entsprechenden Id als DatasetMetadata-Objekt in der ilidata.xml-Datei vor. Im Gegensatz zu den beiden Profilkonfigurationen ist diese vom Typ `http://codes.interlis.ch/type/ilivalidatorconfig` und wird darum nicht als Profil interpretiert:
+
+
+```xml
+      <DatasetIdx16.DataIndex.DatasetMetadata TID="2">
+        <id>DMAV_V1_0_Validierung</id>
+        <categories>
+          <DatasetIdx16.Code_>
+            <value>http://codes.interlis.ch/type/ilivalidatorconfig</value>
+          </DatasetIdx16.Code_>
+        </categories>
+        <files>
+          <DatasetIdx16.DataFile>
+            <fileFormat>text/plain</fileFormat>
+            <file>
+              <DatasetIdx16.File>
+                <path>DMAV_V1_0_Validierung.ini</path>
+              </DatasetIdx16.File>
+            </file>
+          </DatasetIdx16.DataFile>
+        </files>
+      </DatasetIdx16.DataIndex.DatasetMetadata>
+```
+
+Die hier referenzierte ini-Datei deklariert beispielsweise das oder die zu verwendenden `additionalModels` sowie weitere spezifische Validierungs-Einstellungen (wie zB. spezifische und mehrsprachige Logmeldungen):
+
+```ini
+["PARAMETER"]
+additionalModels="DMAV_V1_0_Validierung"
+
+["DMAV_Bodenbedeckung_V1_0.Bodenbedeckung.BBNachfuehrung.CH080101"]
+msg_de="Benutzerschlüssel ist nicht eindeutig (Attributkombination: NBIdent, Identifikator)"
+msg="Benutzerschlüssel ist nicht eindeutig (Attributkombination: NBIdent, Identifikator)"
+msg_fr="La clé utilisateur n'est pas unique (Combinaison d'attributs : IdentDN, Identification)"
+...
+```
+
 ## Health Check API
 
 Für das Monitoring im produktiven Betrieb steht unter `https://<host>:<port>/health` eine Health Check API zur Verfügung. Anhand der Antwort *Healthy* (HTTP Status Code 200), resp. *Unhealthy* (HTTP Status Code 503) kann der Status der Applikation bspw. mit cURL abgefragt werden.
