@@ -313,16 +313,13 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             }
 
             // Add trace if enabled
-            if (ilitoolsEnvironment.TraceEnabled)
-            {
-                yield return "--trace";
-            }
+            if (ilitoolsEnvironment.TraceEnabled) yield return "--trace";
 
             // Add model directory
             yield return $"--modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\"";
 
-            // Add profile
-            yield return $"--metaConfig \"ilidata:{request.Profile.Id}\"";
+            // Add profile if specified
+            if (request.Profile != null) yield return $"--metaConfig \"ilidata:{request.Profile.Id}\"";
         }
 
         /// <summary>

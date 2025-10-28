@@ -54,7 +54,7 @@ public class GwpProcessor : IProcessor
         if (TryCopyTemplateGpkg(profile, out var dataGpkgFilePath))
         {
             var importTransferFileExitCode = await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile.FileName, profile, cancellationToken);
-            var importLogTransferFileExitCode = await ImportLogToGpkg(fileProvider, dataGpkgFilePath, profile, cancellationToken);
+            var importLogTransferFileExitCode = await ImportLogToGpkg(fileProvider, dataGpkgFilePath, cancellationToken);
 
             if (importLogTransferFileExitCode == 0 && importTransferFileExitCode == 0)
             {
@@ -128,7 +128,7 @@ public class GwpProcessor : IProcessor
         return true;
     }
 
-    private async Task<int> ImportLogToGpkg(IFileProvider fileProvider, string gpkgFilePath, Profile profile, CancellationToken cancellationToken)
+    private async Task<int> ImportLogToGpkg(IFileProvider fileProvider, string gpkgFilePath, CancellationToken cancellationToken)
     {
         var logFileName = fileProvider.GetFiles().FirstOrDefault(f => f.EndsWith("_log.xtf", StringComparison.InvariantCultureIgnoreCase));
         var logFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, logFileName);
@@ -138,7 +138,6 @@ public class GwpProcessor : IProcessor
             FilePath = logFilePath,
             FileName = logFileName,
             DbFilePath = gpkgFilePath,
-            Profile = profile,
             Dataset = "Logs",
         };
 
