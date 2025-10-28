@@ -28,4 +28,9 @@ public class GwpProcessorOptions
     /// The resulting GeoPackage file with the imported data gets added to the ZIP archive.
     /// </summary>
     public string DataGpkgFileName { get; set; } = "data.gpkg";
+
+    /// <summary>
+    /// The name of the QGIS file given to the QGIS Server as basis for map services.
+    /// </summary>
+    public string QgisProjectFileName { get; set; } = "service.qgs";
 }
