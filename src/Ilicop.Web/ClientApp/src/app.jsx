@@ -5,6 +5,7 @@ import Home from "./home";
 import ModalContent from "./modalContent";
 import Footer from "./footer";
 import Header from "./header";
+import { useTranslation } from "react-i18next";
 
 export const App = () => {
   const [modalContent, setModalContent] = useState(false);
@@ -21,6 +22,8 @@ export const App = () => {
   const [licenseInfo, setLicenseInfo] = useState(null);
   const [licenseInfoCustom, setLicenseInfoCustom] = useState(null);
 
+  const { i18n } = useTranslation();
+
   // Update HTML title property
   useEffect(() => (document.title = clientSettings?.applicationName), [clientSettings]);
 
@@ -33,27 +36,29 @@ export const App = () => {
 
   // Fetch optional custom content
   useEffect(() => {
-    fetch("impressum.md")
+    if (!i18n.language) return;
+
+    fetch(`impressum.${i18n.language}.md`)
       .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
       .then((text) => setImpressumContent(text));
 
-    fetch("datenschutz.md")
+    fetch(`datenschutz.${i18n.language}.md`)
       .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
       .then((text) => setDatenschutzContent(text));
 
-    fetch("info-hilfe.md")
+    fetch(`info-hilfe.${i18n.language}.md`)
       .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
       .then((text) => setInfoHilfeContent(text));
 
-    fetch("nutzungsbestimmungen.md")
+    fetch(`nutzungsbestimmungen.${i18n.language}.md`)
       .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
       .then((text) => setNutzungsbestimmungenContent(text));
 
-    fetch("banner.md")
+    fetch(`banner.${i18n.language}.md`)
       .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
       .then((text) => setBannerContent(text));
 
-    fetch("quickstart.txt")
+    fetch(`quickstart.${i18n.language}.txt`)
       .then((res) => res.headers.get("content-type")?.includes("text/plain") && res.text())
       .then((text) => setQuickStartContent(text));
 
@@ -64,7 +69,7 @@ export const App = () => {
     fetch("license.custom.json")
       .then((res) => res.headers.get("content-type")?.includes("application/json") && res.json())
       .then((json) => setLicenseInfoCustom(json));
-  }, []);
+  }, [i18n.language]);
 
   const openModalContent = (content, type) =>
     setModalContent(content) & setModalContentType(type) & setShowModalContent(true);
