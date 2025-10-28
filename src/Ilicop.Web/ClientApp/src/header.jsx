@@ -1,8 +1,9 @@
 import "./app.css";
-import React from "react";
+import LanguageDropdown from "./languageDropdown";
 
 export const Header = (props) => {
   const { clientSettings } = props;
+
   return (
     <header>
       <a href={clientSettings?.vendorLink} target="_blank" rel="noreferrer">
@@ -15,6 +16,7 @@ export const Header = (props) => {
           }}
         />
       </a>
+      <LanguageDropdown />
     </header>
   );
 };
