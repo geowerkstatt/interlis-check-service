@@ -23,6 +23,7 @@ i18n
       useSuspense: false,
     },
     supportedLngs: SupportedLanguages,
+    fallbackLng: "de",
     ns: ["common"],
     defaultNS: "common",
     interpolation: {
