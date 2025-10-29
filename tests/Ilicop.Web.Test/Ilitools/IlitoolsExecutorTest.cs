@@ -48,6 +48,15 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         }
 
         [TestMethod]
+        public void GetCommonIlitoolsArgumentsWithoutProfile()
+        {
+            var request = CreateValidationRequest("/test/path", "test.xtf");
+            var args = string.Join(" ", ilitoolsExecutor.GetCommonIlitoolsArguments(request));
+
+            Assert.IsFalse(args.Contains("--metaConfig"));
+        }
+
+        [TestMethod]
         public void GetCommonIlitoolsArgumentsWithoutLogging()
         {
             var request = CreateValidationRequest("/test/path", "test.xtf", "DEFAULT", verboseLogging: false, log: true, xtfLog: true);
@@ -166,7 +175,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         private ValidationRequest CreateValidationRequest(
             string homeDirectory,
             string transferFile,
-            string profileId,
+            string profileId = null,
             string modelNames = null,
             List<string> additionalCatalogueFilePaths = null,
             bool verboseLogging = true,
@@ -189,7 +198,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 GpkgModelNames = modelNames,
                 VerboseLogging = verboseLogging,
                 AdditionalCatalogueFilePaths = additionalCatalogueFilePaths ?? new List<string>(),
-                Profile = new Profile { Id = profileId },
+                Profile = profileId != null ? new Profile { Id = profileId } : null,
             };
         }
     }
