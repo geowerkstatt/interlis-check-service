@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -35,14 +36,14 @@ namespace Geowerkstatt.Ilicop.Web.Services
                 return null;
             }
 
-            var template = TemplateParser.Parse(route.Config.Match.Path);
+            var template = RoutePatternFactory.Parse(route.Config.Match.Path);
             if (!template.Parameters.Any(p => p.Name == options.Value.JobIdParameterName))
             {
                 logger.LogInformation("No parameter {ParameterName} found in route template <{RouteTemplate}>. Cannot build map service URL for job <{JobId}>.", options.Value.MapServerRouteId, route.Config.Match.Path, jobId);
                 return null;
             }
 
-            var templateBinder = templateBinderFactory.Create(template, new());
+            var templateBinder = templateBinderFactory.Create(template);
             var values = new RouteValueDictionary
             {
                 { options.Value.JobIdParameterName, jobId.ToString() },
