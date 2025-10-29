@@ -69,7 +69,7 @@ public class GwpProcessor : IProcessor
         }
         else
         {
-            logger.LogWarning("No data GeoPackage file found at <{GpkgFilePath}> for profile <{ProfileId}>. Skipping GWP GeoPackage creation for job <{JobId}>.", dataGpkgFilePath, profile.Id, jobId);
+            logger.LogWarning("Template GeoPackage for profile <{Profile}> file could not be copied. Skipping GWP GeoPackage creation for job <{JobId}>.", profile.Id, jobId);
         }
 
         CreateZip(jobId, transferFile, profile);
@@ -113,6 +113,8 @@ public class GwpProcessor : IProcessor
 
         if (!File.Exists(templateGpkgFilePath))
         {
+            logger.LogWarning("No template GeoPackage file found at <{TemplateGpkgFilePath}>.", templateGpkgFilePath);
+
             dataGpkgFilePath = null;
             return false;
         }
