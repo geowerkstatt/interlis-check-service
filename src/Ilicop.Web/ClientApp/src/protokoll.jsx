@@ -5,11 +5,12 @@ import { Card, Col, Container, Row } from "react-bootstrap";
 import { GoFile, GoFileCode } from "react-icons/go";
 import { BsGeoAlt, BsLink45Deg, BsFiletypeCsv } from "react-icons/bs";
 import { LogDisplay } from "./logDisplay";
+import { useTranslation } from "react-i18next";
 
 export const Protokoll = (props) => {
   const { log, statusData, fileName, validationRunning } = props;
-  const copyToClipboardTooltipDefaultText = "XTF-Log-Datei Link in die Zwischenablage kopieren";
-  const [copyToClipboardTooltipText, setCopyToClipboardTooltipText] = useState(copyToClipboardTooltipDefaultText);
+  const { t } = useTranslation();
+  const [copyToClipboardTooltipText, setCopyToClipboardTooltipText] = useState("protocol.copyToClipboard");
   const [indicateWaiting, setIndicateWaiting] = useState(false);
   const protokollTimestamp = DayJS(new Date()).format("YYYYMMDDHHmm");
   const protokollFileName = "Ilivalidator_output_" + fileName + "_" + protokollTimestamp;
@@ -30,15 +31,15 @@ export const Protokoll = (props) => {
   );
 
   // Copy to clipboard
-  const resetToDefaultText = () => setCopyToClipboardTooltipText(copyToClipboardTooltipDefaultText);
+  const resetToDefaultText = () => setCopyToClipboardTooltipText("protocol.copyToClipboard");
   const currentUrl = window.location.toString();
   const copyToClipboard = () => {
     navigator.clipboard.writeText(currentUrl.slice(0, currentUrl.length - 1) + statusData.xtfLogUrl);
-    setCopyToClipboardTooltipText("Link wurde kopiert");
+    setCopyToClipboardTooltipText("protocol.copiedToClipboard");
   };
 
   const statusClass = statusData && statusData.status === "completed" ? "valid" : "errors";
-  const statusText = statusData && statusData.status === "completed" ? "Keine Fehler!" : "Fehler!";
+  const statusText = statusData && statusData.status === "completed" ? "protocol.noErrors" : "protocol.errors";
 
   return (
     <Container>
@@ -58,7 +59,7 @@ export const Protokoll = (props) => {
                 </div>
                 {statusData && (
                   <Card.Title className={`status ${statusClass}`}>
-                    {statusText}
+                    {t(statusText)}
                     <span>
                       {statusData.logUrl && (
                         <span className="icon-tooltip">
@@ -69,7 +70,7 @@ export const Protokoll = (props) => {
                           >
                             <GoFile />
                           </a>
-                          <span className="icon-tooltip-text">Log-Datei herunterladen</span>
+                          <span className="icon-tooltip-text">Log-{t("protocol.downloadFile")}</span>
                         </span>
                       )}
                       {statusData.xtfLogUrl && (
@@ -81,7 +82,7 @@ export const Protokoll = (props) => {
                           >
                             <GoFileCode />
                           </a>
-                          <span className="icon-tooltip-text">XTF-Log-Datei herunterladen</span>
+                          <span className="icon-tooltip-text">XTF-Log-{t("protocol.downloadFile")}</span>
                         </span>
                       )}
                       {statusData.xtfLogUrl && (
@@ -92,7 +93,7 @@ export const Protokoll = (props) => {
                             onMouseLeave={resetToDefaultText}
                           >
                             <BsLink45Deg />
-                            <span className="icon-tooltip-text">{copyToClipboardTooltipText}</span>
+                            <span className="icon-tooltip-text">{t(copyToClipboardTooltipText)}</span>
                           </div>
                         </span>
                       )}
@@ -105,7 +106,7 @@ export const Protokoll = (props) => {
                           >
                             <BsFiletypeCsv />
                           </a>
-                          <span className="icon-tooltip-text">CSV-Log-Datei herunterladen</span>
+                          <span className="icon-tooltip-text">CSV-Log-{t("protocol.downloadFile")}</span>
                         </span>
                       )}
                       {statusData.geoJsonLogUrl && (
@@ -117,9 +118,7 @@ export const Protokoll = (props) => {
                           >
                             <BsGeoAlt />
                           </a>
-                          <span className="icon-tooltip-text">
-                            Positionsbezogene Log-Daten als GeoJSON-Datei herunterladen
-                          </span>
+                          <span className="icon-tooltip-text">{t("protocol.downloadGeoJson")}</span>
                         </span>
                       )}
                     </span>

@@ -1,0 +1,47 @@
+{
+    "common": {
+        "close": "Fermer",
+        "cancel": "Annuler",
+        "profile": "Profil",
+        "validate": "Valider"
+    },
+    "about": {
+        "title": "À propos",
+        "text": "Pour la visualisation et le traitement ultérieur des journaux de validation, nous recommandons d'utiliser le <1>XTFLog-Checker</1> dans QGIS.",
+        "versionInformation": "Informations sur la version",
+        "developmentAndBugTrackingTitle": "Développement et suivi des bogues",
+        "developmentAndBugTrackingText": "Le code est disponible sous la <1>GNU Affero General Public License v3.0 (AGPL-3.0)</1> version 3 dans le <3>dépôt GitHub</3>. Si vous rencontrez des bogues, vous pouvez y ouvrir un <5>Issue</5>.",
+        "licenceInformation": "Informations sur la licence"
+    },
+    "dropzone": {
+        "info": "Déposer le fichier ({{acceptedFileTypes}}) ici ou cliquer pour sélectionner depuis le système de fichiers local.",
+        "error": {
+            "fileInvalidType": "Le type de fichier n'est pas pris en charge. Veuillez sélectionner un fichier (max. 200 Mo) avec l'une des extensions de fichier suivantes : {{acceptedFileTypes}}",
+            "tooManyFiles": "Un seul fichier peut être vérifié à la fois.",
+            "fileTooLarge": "Le fichier sélectionné dépasse 200 Mo. Veuillez sélectionner un fichier plus petit ou créer un fichier ZIP.",
+            "default": "Veuillez sélectionner un fichier (max. 200 Mo) avec l'une des extensions de fichier suivantes : {{acceptedFileTypes}}"
+        }
+    },
+    "footer": {
+        "infoHelp": "Info & Aide",
+        "termsOfUse": "Conditions d'utilisation",
+        "privacy": "Confidentialité",
+        "imprint": "Mentions légales",
+        "about": "À propos"
+    },
+    "protocol": {
+        "copyToClipboard": "Copier le lien du fichier XTF-Log dans le presse-papiers",
+        "copiedToClipboard": "Lien copié",
+        "noErrors": "Aucune erreur !",
+        "errors": "Erreurs !",
+        "downloadFile": "Télécharger le fichier",
+        "downloadGeoJson": "Télécharger les données de journalisation géolocalisées au format GeoJSON"
+    },
+    "title": {
+        "title": "Validation en ligne des données INTERLIS"
+    },
+    "uploadForm": {
+        "acceptTerms": "J'accepte les <1>conditions d'utilisation</1>",
+        "validationRunning": "Validation en cours..."
+    }
+}

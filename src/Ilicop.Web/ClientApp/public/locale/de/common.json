@@ -1,0 +1,47 @@
+{
+    "common": {
+        "close": "Schliessen",
+        "cancel": "Abbrechen",
+        "profile": "Profil",
+        "validate": "Validieren"
+    },
+    "about": {
+        "title": "About",
+        "text": "Zur Visualisierung und weiteren Bearbeitung der Validierungslogs empfehlen wir die Verwendung des <1>XTFLog-Checker</1> im QGIS.",
+        "versionInformation": "Versionsinformationen",
+        "developmentAndBugTrackingTitle": "Entwicklung und Bugtracking",
+        "developmentAndBugTrackingText": "Der Code steht unter der <1>GNU Affero General Public License v3.0 (AGPL-3.0)</1> Version 3 im <3>GitHub Repository</3> zur Verfügung. Falls Ihnen Bugs begegnen, können Sie dort ein <5>Issue</5> eröffnen.",
+        "licenceInformation": "Lizenzinformationen"
+    },
+    "dropzone": {
+        "info": "Datei ({{acceptedFileTypes}}) hier ablegen oder klicken um vom lokalen Dateisystem auszuwählen.",
+        "error": {
+            "fileInvalidType": "Der Dateityp wird nicht unterstützt. Bitte wähle eine Datei (max. 200MB) mit einer der folgenden Dateiendungen: {{acceptedFileTypes}}",
+            "tooManyFiles": "Es kann nur eine Datei aufs Mal geprüft werden.",
+            "fileTooLarge": "Die ausgewählte Datei ist über 200MB gross. Bitte wähle eine kleinere Datei oder erstelle eine ZIP-Datei.",
+            "default": "Bitte wähle eine Datei (max. 200MB) mit einer der folgenden Dateiendungen: {{acceptedFileTypes}}"
+        }
+    },
+    "footer": {
+        "infoHelp": "Info & Hilfe",
+        "termsOfUse": "Nutzungsbedingungen",
+        "privacy": "Datenschutz",
+        "imprint": "Impressum",
+        "about": "About"
+    },
+    "protocol": {
+        "copyToClipboard": "XTF-Log-Datei Link in die Zwischenablage kopieren",
+        "copiedToClipboard": "Link kopiert",
+        "noErrors": "Keine Fehler!",
+        "errors": "Fehler!",
+        "downloadFile": "Datei herunterladen",
+        "downloadGeoJson": "Positionsbezogene Log-Daten als GeoJSON-Datei herunterladen"
+    },
+    "title": {
+        "title": "Online Validierung von INTERLIS Daten"
+    },
+    "uploadForm": {
+        "acceptTerms": "Ich akzeptiere die <1>Nutzungsbedingungen</1>",
+        "validationRunning": "Validierung läuft..."
+    }
+}
