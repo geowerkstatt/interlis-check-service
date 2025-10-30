@@ -4,6 +4,7 @@ import DayJS from "dayjs";
 import { Card, Col, Container, Row } from "react-bootstrap";
 import { GoFile, GoFileCode } from "react-icons/go";
 import { BsGeoAlt, BsLink45Deg, BsFiletypeCsv } from "react-icons/bs";
+import { Spinner } from "react-bootstrap";
 import { LogDisplay } from "./logDisplay";
 import { useTranslation } from "react-i18next";
 
@@ -38,6 +39,10 @@ export const Protokoll = (props) => {
     setCopyToClipboardTooltipText("protocol.copiedToClipboard");
   };
 
+  const getTranslatedLogMessage = (logEntry) => {
+    return t(logEntry.messageKey, logEntry.messageParams);
+  };
+
   const statusClass = statusData && statusData.status === "completed" ? "valid" : "errors";
   const statusText = statusData && statusData.status === "completed" ? "protocol.noErrors" : "protocol.errors";
 
@@ -51,8 +56,10 @@ export const Protokoll = (props) => {
                 <div className="protokoll">
                   {log.map((logEntry, index) => (
                     <div key={index}>
-                      {logEntry}
-                      {indicateWaiting && index === log.length - 1 && "."}
+                      {validationRunning && index === log.length - 1 && (
+                        <Spinner className="protokoll-spinner" size="sm" animation="border" />
+                      )}
+                      {getTranslatedLogMessage(logEntry)}
                     </div>
                   ))}
                   <div ref={logEndRef} />

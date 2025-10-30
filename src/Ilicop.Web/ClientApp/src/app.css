@@ -77,9 +77,13 @@ header {
   min-height: 150px;
 }
 
-
 .card-body {
   text-align: left;
+}
+
+.protokoll-spinner {
+  margin-right: 0.5rem;
+  align-self: center;
 }
 
 /************ Log ************/

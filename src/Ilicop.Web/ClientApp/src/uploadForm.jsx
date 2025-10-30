@@ -69,7 +69,7 @@ export const UploadForm = ({
                   ) : (
                     <Button
                       className="check-button"
-                      onClick={startValidation}
+                      onClick={() => startValidation()}
                       disabled={nutzungsbestimmungenAvailable && !checkedNutzungsbestimmungen}
                     >
                       {t("common.validate")}

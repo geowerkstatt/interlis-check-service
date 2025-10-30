@@ -43,5 +43,22 @@
     "uploadForm": {
         "acceptTerms": "J'accepte les <1>conditions d'utilisation</1>",
         "validationRunning": "Validation en cours..."
+    },
+    "log": {
+        "uploadingFile": "Télécharger {{fileName}}",
+        "uploadFailed": "Le téléchargement a échoué. La validation a été annulée.",
+        "apiMessages": {
+            "Validating file": "Le fichier est en cours de validation",
+            "Validation successful": "Les données sont conformes au modèle",
+            "File extension not allowed": "L'extension de fichier n'est pas autorisée",
+            "Multiple transfer files found": "Plusieurs fichiers de transfert ont été trouvés",
+            "No transfer file found": "Aucun fichier de transfert valide n'a été trouvé",
+            "Could not read model names from GeoPackage": "Impossible de lire les noms de modèle à partir de la base de données GeoPackage",
+            "Invalid XML structure": "La structure XML du fichier de transfert est invalide",
+            "Data not conform to INTERLIS model": "Les données ne sont pas conformes au modèle INTERLIS"
+        }
+    },
+    "logHierarchy": {
+        "otherMessages": "Autres messages"
     }
 }
