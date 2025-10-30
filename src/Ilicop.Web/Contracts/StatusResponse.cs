@@ -55,5 +55,10 @@ namespace Geowerkstatt.Ilicop.Web.Contracts
         /// The GeoJSON log url if available; otherwise, <c>null</c>. Please be aware that the log file might not be complete while validation is still processing.
         /// </summary>
         public Uri GeoJsonLogUrl { get; set; }
+
+        /// <summary>
+        /// The map service URL if available; otherwise, <c>null</c>. Please be aware that the service might not be available while validation is still processing.
+        /// </summary>
+        public Uri MapServiceUrl { get; set; }
     }
 }

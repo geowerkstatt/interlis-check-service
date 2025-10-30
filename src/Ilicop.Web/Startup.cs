@@ -1,4 +1,5 @@
 ﻿using Geowerkstatt.Ilicop.Web.Ilitools;
+using Geowerkstatt.Ilicop.Web.ReverseProxy;
 using Geowerkstatt.Ilicop.Web.Services;
 using Geowerkstatt.Interlis.RepositoryCrawler;
 using Microsoft.AspNetCore.Builder;
@@ -141,6 +142,13 @@ namespace Geowerkstatt.Ilicop.Web
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddReverseProxy()
+                .AddTransformFactory<QueryRouteValuesTransformFactory>()
+                .LoadFromConfig(Configuration.GetSection("ReverseProxy"));
+
+            services.AddTransient<IMapServiceUriGenerator, MapServiceUriGenerator>();
+            services.Configure<MapServiceUriGenerationParameters>(Configuration.GetSection("MapServiceGeneration"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -177,7 +185,6 @@ namespace Geowerkstatt.Ilicop.Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-
             app.UseCors("CorsSettings");
             app.UseRouting();
 
@@ -185,6 +192,7 @@ namespace Geowerkstatt.Ilicop.Web
             {
                 endpoints.MapControllerRoute(name: "default", pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapHealthChecks("/health");
+                endpoints.MapReverseProxy();
             });
 
             app.UseSwagger(options =>

@@ -3,13 +3,12 @@ import React, { useState, useRef, useEffect } from "react";
 import DayJS from "dayjs";
 import { Card, Col, Container, Row } from "react-bootstrap";
 import { GoFile, GoFileCode } from "react-icons/go";
-import { BsGeoAlt, BsLink45Deg, BsFiletypeCsv, BsFileZip } from "react-icons/bs";
+import { BsGeoAlt, BsLink45Deg, BsFiletypeCsv, BsFileZip, BsMap } from "react-icons/bs";
 import { LogDisplay } from "./logDisplay";
+import { CopyLinkToClipboard } from "./copyLinkToClipboard";
 
 export const Protokoll = (props) => {
   const { log, statusData, fileName, validationRunning } = props;
-  const copyToClipboardTooltipDefaultText = "XTF-Log-Datei Link in die Zwischenablage kopieren";
-  const [copyToClipboardTooltipText, setCopyToClipboardTooltipText] = useState(copyToClipboardTooltipDefaultText);
   const [indicateWaiting, setIndicateWaiting] = useState(false);
   const protokollTimestamp = DayJS(new Date()).format("YYYYMMDDHHmm");
   const protokollFileName = "Ilivalidator_output_" + fileName + "_" + protokollTimestamp;
@@ -28,14 +27,6 @@ export const Protokoll = (props) => {
       }
     }, 500)
   );
-
-  // Copy to clipboard
-  const resetToDefaultText = () => setCopyToClipboardTooltipText(copyToClipboardTooltipDefaultText);
-  const currentUrl = window.location.toString();
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(currentUrl.slice(0, currentUrl.length - 1) + statusData.xtfLogUrl);
-    setCopyToClipboardTooltipText("Link wurde kopiert");
-  };
 
   const statusClass = statusData && statusData.status === "completed" ? "valid" : "errors";
   const statusText = statusData && statusData.status === "completed" ? "Keine Fehler!" : "Fehler!";
@@ -86,14 +77,24 @@ export const Protokoll = (props) => {
                       )}
                       {statusData.xtfLogUrl && (
                         <span className="icon-tooltip">
-                          <div
+                          <CopyLinkToClipboard
                             className={statusClass + " btn-sm download-icon"}
-                            onClick={copyToClipboard}
-                            onMouseLeave={resetToDefaultText}
+                            tooltipText="XTF-Log-Datei Link in die Zwischenablage kopieren"
+                            link={statusData.xtfLogUrl}
                           >
                             <BsLink45Deg />
-                            <span className="icon-tooltip-text">{copyToClipboardTooltipText}</span>
-                          </div>
+                          </CopyLinkToClipboard>
+                        </span>
+                      )}
+                      {statusData.mapServiceUrl && (
+                        <span className="icon-tooltip">
+                          <CopyLinkToClipboard
+                            className={statusClass + " btn-sm download-icon"}
+                            tooltipText="WMS/WFS Link in die Zwischenablage kopieren"
+                            link={statusData.mapServiceUrl}
+                          >
+                            <BsMap />
+                          </CopyLinkToClipboard>
                         </span>
                       )}
                       {statusData.csvLogUrl && (

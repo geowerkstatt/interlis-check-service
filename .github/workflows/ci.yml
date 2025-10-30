@@ -29,15 +29,15 @@ jobs:
         run: npm ci
 
       - name: Install dependencies
-        run: dotnet restore
+        run: dotnet restore Ilicop.sln
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build dotnet
-        run: dotnet build
+        run: dotnet build Ilicop.sln -c Release --no-restore
 
       - name: Test
-        run: dotnet test
+        run: dotnet test Ilicop.sln
 
       - name: Build frontend
         working-directory: ./src/Ilicop.Web/ClientApp
