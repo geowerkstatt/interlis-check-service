@@ -1,7 +1,9 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
+using Geowerkstatt.Ilicop.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
@@ -16,6 +18,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         private Mock<IValidatorService> validatorServiceMock;
         private Mock<IFileProvider> fileProviderMock;
         private Mock<ApiVersion> apiVersionMock;
+        private Mock<IOptions<GwpProcessorOptions>> gwpProcessorOptionsMock;
+        private Mock<IMapServiceUriGenerator> mapServiceUriGeneratorMock;
         private StatusController controller;
 
         public TestContext TestContext { get; set; }
@@ -27,11 +31,23 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             validatorServiceMock = new Mock<IValidatorService>(MockBehavior.Strict);
             fileProviderMock = new Mock<IFileProvider>(MockBehavior.Strict);
             apiVersionMock = new Mock<ApiVersion>(MockBehavior.Strict, 8, 77);
+            gwpProcessorOptionsMock = new Mock<IOptions<GwpProcessorOptions>>(MockBehavior.Strict);
+            mapServiceUriGeneratorMock = new Mock<IMapServiceUriGenerator>(MockBehavior.Strict);
+
+            gwpProcessorOptionsMock.SetupGet(x => x.Value)
+                .Returns(new GwpProcessorOptions()
+                {
+                    QgisProjectFileName = "project.qgs",
+                });
+
+            fileProviderMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(false);
 
             controller = new StatusController(
                 loggerMock.Object,
                 validatorServiceMock.Object,
-                fileProviderMock.Object);
+                fileProviderMock.Object,
+                gwpProcessorOptionsMock.Object,
+                mapServiceUriGeneratorMock.Object);
         }
 
         [TestCleanup]
@@ -69,6 +85,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             Assert.AreEqual($"/api/v8/download?jobId={jobId}&logType=xtf", ((StatusResponse)response.Value).XtfLogUrl.ToString());
             Assert.AreEqual($"/api/v8/download/json?jobId={jobId}", ((StatusResponse)response.Value).JsonLogUrl.ToString());
             Assert.IsNull(((StatusResponse)response.Value).GeoJsonLogUrl);
+            Assert.IsNull(((StatusResponse)response.Value).MapServiceUrl);
         }
 
         [TestMethod]
@@ -107,6 +124,32 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             Assert.IsInstanceOfType(response, typeof(ObjectResult));
             Assert.AreEqual(StatusCodes.Status404NotFound, response.StatusCode);
             Assert.AreEqual($"No job information available for job id <{jobId}>", ((ProblemDetails)response.Value).Detail);
+        }
+
+        [TestMethod]
+        public void GetStatusWithMapService()
+        {
+            var jobId = new Guid("0ef30166-df4e-4eb4-8ef5-f355af39090d");
+
+            fileProviderMock.Setup(x => x.Initialize(jobId));
+            fileProviderMock.Setup(x => x.GetFiles()).Returns(new[] { "SILENTFIRE_LOG.xtf" });
+            fileProviderMock.Setup(x => x.Exists("project.qgs")).Returns(true);
+            fileProviderMock.SetupGet(x => x.HomeDirectory).Returns(new DirectoryInfo(TestContext.DeploymentDirectory));
+
+            validatorServiceMock
+                .Setup(x => x.GetJobStatusOrDefault(jobId))
+                .Returns((Status.Processing, "WAFFLESPATULA GREENNIGHT"));
+
+            mapServiceUriGeneratorMock.Setup(x => x.BuildMapServiceUri(jobId))
+                .Returns(new Uri($"/api/v8/mapservice/{jobId}", UriKind.Relative));
+
+            var response = controller.GetStatus(apiVersionMock.Object, jobId) as OkObjectResult;
+
+            Assert.IsInstanceOfType(response, typeof(OkObjectResult));
+            Assert.IsInstanceOfType(response.Value, typeof(StatusResponse));
+            Assert.AreEqual(StatusCodes.Status200OK, response.StatusCode);
+            Assert.AreEqual(jobId, ((StatusResponse)response.Value).JobId);
+            Assert.AreEqual($"/api/v8/mapservice/{jobId}", ((StatusResponse)response.Value).MapServiceUrl.ToString());
         }
     }
 }

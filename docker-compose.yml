@@ -6,7 +6,7 @@ secrets:
     file: ./github_nuget_token.txt
 
 services:
-  web:
+  ilicop:
     # Docker image (NAME:TAG)
     #   - image: ghcr.io/geowerkstatt/interlis-check-service:v3
     #     Stable tag for a specific major version
@@ -143,6 +143,8 @@ services:
       - PUID=1000
       - PGID=1000
       - ENABLE_GPKG_VALIDATION=true
+      - ReverseProxy__Clusters__qgisservercluster__Destinations__qgisserver__Address=http://qgis-server:80/
+  
     # Expose ports (HOST:CONTAINER)
     #
     # ports:
@@ -151,3 +153,13 @@ services:
     #     INTERLIS Web-Check-Service web app runs on port 8080 inside the container
     ports:
       - 3080:8080
+
+  qgis-server:
+    image: camptocamp/qgis-server:latest
+    ports:
+      - "8380:80"
+    volumes:
+      - ./data/Uploads:/uploads:ro
+    environment:
+      - QGIS_SERVER_LOG_LEVEL=0  # INFO (log all requests)
+      - DEBUG=1                  # display env before spawning QGIS Server

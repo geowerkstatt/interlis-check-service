@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "Development",
+    "Projects": [
+      {
+        "Path": "src\\Ilicop.Web\\Ilicop.Web.csproj",
+        "Action": "Start",
+        "DebugTarget": "Ilicop.Web"
+      },
+      {
+        "Path": "docker-compose.dcproj",
+        "Action": "Start",
+        "DebugTarget": "Docker Compose"
+      }
+    ]
+  }
+]

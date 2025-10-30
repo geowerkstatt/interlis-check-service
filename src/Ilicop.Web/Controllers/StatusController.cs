@@ -1,11 +1,18 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
+using Geowerkstatt.Ilicop.Web.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using Yarp.ReverseProxy;
+using Yarp.ReverseProxy.Configuration;
 
 namespace Geowerkstatt.Ilicop.Web.Controllers
 {
@@ -16,12 +23,21 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         private readonly ILogger<StatusController> logger;
         private readonly IValidatorService validatorService;
         private readonly IFileProvider fileProvider;
+        private readonly IOptions<GwpProcessorOptions> gwpProcessorOptions;
+        private readonly IMapServiceUriGenerator mapServiceUriGenerator;
 
-        public StatusController(ILogger<StatusController> logger, IValidatorService validatorService, IFileProvider fileProvider)
+        public StatusController(
+            ILogger<StatusController> logger,
+            IValidatorService validatorService,
+            IFileProvider fileProvider,
+            IOptions<GwpProcessorOptions> gwpProcessorOptions,
+            IMapServiceUriGenerator mapServiceUriGenerator)
         {
             this.logger = logger;
             this.validatorService = validatorService;
             this.fileProvider = fileProvider;
+            this.gwpProcessorOptions = gwpProcessorOptions;
+            this.mapServiceUriGenerator = mapServiceUriGenerator;
         }
 
         /// <summary>
@@ -59,7 +75,22 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                 CsvLogUrl = csvLogUrl,
                 JsonLogUrl = xtfLogUrl == null ? null : GetJsonLogUrl(version, jobId), // JSON is generated from the XTF log file
                 GeoJsonLogUrl = GetLogDownloadUrl(version, jobId, LogType.GeoJson),
+                MapServiceUrl = GetMapServiceUrl(jobId, fileProvider),
             });
+        }
+
+        /// <summary>
+        /// Gets the map service URL for the specified <paramref name="jobId"/> if service definition file is available.
+        /// </summary>
+        /// <param name="jobId"></param>
+        /// <param name="fileProvider"></param>
+        /// <returns>Relative url of the configured QGIS server proxy route.</returns>
+        private Uri GetMapServiceUrl(Guid jobId, IFileProvider fileProvider)
+        {
+            if (!fileProvider.Exists(gwpProcessorOptions.Value.QgisProjectFileName))
+                return null;
+
+            return mapServiceUriGenerator.BuildMapServiceUri(jobId);
         }
 
         /// <summary>

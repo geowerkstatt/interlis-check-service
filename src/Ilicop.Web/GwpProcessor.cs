@@ -60,6 +60,8 @@ public class GwpProcessor : IProcessor
             {
                 if (IsTranslationNeeded(dataGpkgFilePath))
                     await CreateTranslatedTransferFile(dataGpkgFilePath, transferFile, profile, cancellationToken);
+
+                TryCopyQgisServiceFile(fileProvider, profile);
             }
             else
             {
@@ -125,6 +127,25 @@ public class GwpProcessor : IProcessor
         using (var sourceGpkgFileStream = File.OpenRead(templateGpkgFilePath))
         {
             sourceGpkgFileStream.CopyTo(destGpkgFileStream);
+        }
+
+        return true;
+    }
+
+    private bool TryCopyQgisServiceFile(IFileProvider fileProvider, Profile profile)
+    {
+        var serviceFile = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.QgisProjectFileName);
+        if (!File.Exists(serviceFile)) return false;
+
+        try
+        {
+            logger.LogInformation("Copying QGIS project file for profile <{ProfileId}>.", profile.Id);
+            File.Copy(serviceFile, Path.Combine(fileProvider.HomeDirectory.FullName, gwpProcessorOptions.QgisProjectFileName), true);
+        }
+        catch (SystemException ex)
+        {
+            logger.LogError(ex, "Failed to copy QGIS project file for profile <{ProfileId}>.", profile.Id);
+            return false;
         }
 
         return true;
