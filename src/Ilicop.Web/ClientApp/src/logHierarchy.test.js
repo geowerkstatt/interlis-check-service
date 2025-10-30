@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { createLogHierarchy } from "./logHierarchy";
+import i18n from "./i18n";
 
 describe("transform log data to hierarchy", () => {
   test("constraint pass", () => {
@@ -178,7 +179,7 @@ describe("transform log data to hierarchy", () => {
         ],
       },
       {
-        message: "Weitere Meldungen",
+        message: i18n.t("logHierarchy.otherMessages"),
         type: "Warning",
         values: [
           { message: "Duplicate warning", type: "Warning" },
@@ -218,7 +219,7 @@ describe("transform log data to hierarchy", () => {
 
     const expected = [
       {
-        message: "Weitere Meldungen",
+        message: i18n.t("logHierarchy.otherMessages"),
         type: "Error",
         values: [
           { message: "Some error", type: "Error" },
