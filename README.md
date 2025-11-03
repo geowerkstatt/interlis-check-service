@@ -212,7 +212,7 @@ Der INTERLIS Web-Check-Service ist seit Version 3 vollständig über eine REST A
 Seit der Version 5 unterstützt der INTERLIS Web-Check-Service sogenannte Prüfprofile. Prüfprofile ermöglichen, dass ein Transferfile gegenüber einem spezifischen Set von Regeln geprüft wird:
 ![Profilauswahl](./assets/ilicheck_app_screenshot_profile.png)
 
-Die eigentliche Validierungen werden nativ mittels INTERLIS beschrieben. Dazu können bestehende Modelldefinitionen ergänzt oder mittels sogenannter Validierungsmodelle erweitert werden. 
+Die eigentliche Validierung wird nativ mittels INTERLIS beschrieben. Dazu können bestehende Modelldefinitionen ergänzt oder mittels sogenannter Validierungsmodelle erweitert werden. 
 Folgende Dokumentationen beschreiben diese Möglichkeit für die Nutzung mit ilivalidator:
 
 [Workshop 'Datenqualität und INTERLIS: ilivalidator nutzen und verstehen'](https://github.com/moflexch/awt3_validierung/tree/main/ws1)
