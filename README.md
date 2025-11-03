@@ -315,6 +315,8 @@ models="DMAV_Bodenbedeckung_V1_0;DMAV_DauerndeBodenverschiebungen_V1_0;DMAV_Dien
 config=ilidata:DMAV_V1_0_Validierung
 ```
 
+Eine vollständige Dokumentation der metaconfig-Optionen ist unter folgendem Link zu finden: https://github.com/claeis/ilivalidator/blob/master/docs/ilivalidator.rst#meta-konfiguration
+
 Die über `config=` referenzierte Konfiguration liegt mit der entsprechenden Id als DatasetMetadata-Objekt in der ilidata.xml-Datei vor. Im Gegensatz zu den beiden Profilkonfigurationen ist diese vom Typ `http://codes.interlis.ch/type/ilivalidatorconfig` und wird darum nicht als Profil interpretiert:
 
 
