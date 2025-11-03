@@ -53,7 +53,7 @@ public class GwpProcessor : IProcessor
 
         if (TryCopyTemplateGpkg(profile, out var dataGpkgFilePath))
         {
-            var importTransferFileExitCode = await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile.FileName, profile, cancellationToken);
+            var importTransferFileExitCode = await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile.FileName, cancellationToken);
             var importLogTransferFileExitCode = await ImportLogToGpkg(fileProvider, dataGpkgFilePath, cancellationToken);
 
             if (importLogTransferFileExitCode == 0 && importTransferFileExitCode == 0)
@@ -167,7 +167,7 @@ public class GwpProcessor : IProcessor
         return await ilitoolsExecutor.ImportToGpkgAsync(logFileImportRequest, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task<int> ImportTransferFileToGpkg(IFileProvider fileProvider, string gpkgFilePath, string transferFile, Profile profile, CancellationToken cancellationToken)
+    private async Task<int> ImportTransferFileToGpkg(IFileProvider fileProvider, string gpkgFilePath, string transferFile, CancellationToken cancellationToken)
     {
         var transferFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, transferFile);
 
@@ -176,7 +176,6 @@ public class GwpProcessor : IProcessor
             FilePath = transferFilePath,
             FileName = transferFile,
             DbFilePath = gpkgFilePath,
-            Profile = profile,
             Dataset = "Data",
         };
 

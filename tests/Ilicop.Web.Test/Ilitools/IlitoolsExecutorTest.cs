@@ -137,7 +137,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
 
             var command = ilitoolsExecutor.CreateIli2GpkgImportCommand(request);
 
-            var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --import --disableValidation --skipReferenceErrors --skipGeometryErrors --dataset \"{request.Dataset}\" --dbfile \"{request.DbFilePath}\" --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:{request.Profile.Id}\" \"{request.FilePath}\"";
+            var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --import --disableValidation --skipReferenceErrors --skipGeometryErrors --importTid --importBid --dataset \"{request.Dataset}\" --dbfile \"{request.DbFilePath}\" --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --metaConfig \"ilidata:{request.Profile.Id}\" \"{request.FilePath}\"";
             Assert.AreEqual(expected, command);
         }
 

@@ -243,6 +243,8 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 "--disableValidation",
                 "--skipReferenceErrors",
                 "--skipGeometryErrors",
+                "--importTid",
+                "--importBid",
                 $"--dataset \"{request.Dataset}\"",
                 $"--dbfile \"{request.DbFilePath}\"",
             };
