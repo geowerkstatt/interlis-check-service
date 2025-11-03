@@ -215,8 +215,8 @@ Seit der Version 5 unterstützt der INTERLIS Web-Check-Service sogenannte Prüfp
 Die eigentliche Validierungen werden nativ mittels INTERLIS beschrieben. Dazu können bestehende Modelldefinitionen ergänzt oder mittels sogenannter Validierungsmodelle erweitert werden. 
 Folgende Dokumentationen beschreiben diese Möglichkeit für die Nutzung mit ilivalidator:
 
-![Workshop 'Datenqualität und INTERLIS: ilivalidator nutzen und verstehen'](https://github.com/moflexch/awt3_validierung/tree/main/ws1)
-![Workshop 'Fortgeschrittene Datenvalidierung mittels ilivalidator und Validierungsmodellen/Konsistenzbedingungen'](https://github.com/moflexch/awt3_validierung/tree/main/ws2)
+[Workshop 'Datenqualität und INTERLIS: ilivalidator nutzen und verstehen'](https://github.com/moflexch/awt3_validierung/tree/main/ws1)
+[Workshop 'Fortgeschrittene Datenvalidierung mittels ilivalidator und Validierungsmodellen/Konsistenzbedingungen'](https://github.com/moflexch/awt3_validierung/tree/main/ws2)
 
 Die so erstellten Konfigurationen stellen die Basis für die Integration im INTERLIS Web-Check-Service dar.
 
