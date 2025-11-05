@@ -1,5 +1,6 @@
 ﻿using Geowerkstatt.Ilicop.Web.Contracts;
 using Geowerkstatt.Ilicop.Web.Ilitools;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -10,7 +11,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Geowerkstatt.Ilicop.Web;
 
@@ -41,7 +41,7 @@ public class GwpProcessor : IProcessor
     }
 
     /// <inheritdoc />
-    public async Task Run(Guid jobId, string transferFile, Profile profile, CancellationToken cancellationToken)
+    public async Task Run(Guid jobId, NamedFile transferFile, Profile profile, CancellationToken cancellationToken)
     {
         if (configDir == null || !Directory.Exists(Path.Combine(configDir.FullName, profile.Id)))
         {
@@ -53,16 +53,60 @@ public class GwpProcessor : IProcessor
 
         if (TryCopyTemplateGpkg(profile, out var dataGpkgFilePath))
         {
-            await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile, profile, cancellationToken);
-            await ImportLogToGpkg(fileProvider, dataGpkgFilePath, profile, cancellationToken);
-            TryCopyQgisServiceFile(fileProvider, profile);
+            var importTransferFileExitCode = await ImportTransferFileToGpkg(fileProvider, dataGpkgFilePath, transferFile.FileName, cancellationToken);
+            var importLogTransferFileExitCode = await ImportLogToGpkg(fileProvider, dataGpkgFilePath, cancellationToken);
+
+            if (importLogTransferFileExitCode == 0 && importTransferFileExitCode == 0)
+            {
+                if (IsTranslationNeeded(dataGpkgFilePath))
+                    await CreateTranslatedTransferFile(dataGpkgFilePath, transferFile, profile, cancellationToken);
+
+                TryCopyQgisServiceFile(fileProvider, profile);
+            }
+            else
+            {
+                File.Delete(dataGpkgFilePath);
+                logger.LogWarning("Importing transfer file or log file to GeoPackage failed for profile <{ProfileId}>. Deleting GeoPackage again for job <{JobId}>.", profile.Id, jobId);
+            }
         }
         else
         {
-            logger.LogWarning("No data GeoPackage file found at <{GpkgFilePath}> for profile <{ProfileId}>. Skipping GWP GeoPackage creation for job <{JobId}>.", dataGpkgFilePath, profile.Id, jobId);
+            logger.LogWarning("Template GeoPackage for profile <{Profile}> file could not be copied. Skipping GWP GeoPackage creation for job <{JobId}>.", profile.Id, jobId);
         }
 
-        CreateZip(jobId, profile);
+        CreateZip(jobId, transferFile, profile);
+    }
+
+    private async Task CreateTranslatedTransferFile(string gpkgPath, NamedFile transferFile, Profile profile, CancellationToken cancellationToken)
+    {
+        var translatedTransferFile = GetTranslatedTransferFile(transferFile);
+
+        var exportRequest = new ExportRequest
+        {
+            FileName = translatedTransferFile.FileName,
+            FilePath = translatedTransferFile.FilePath,
+            Profile = profile,
+            DbFilePath = gpkgPath,
+            Dataset = "Data",
+        };
+
+        await ilitoolsExecutor.ExportFromGpkgAsync(exportRequest, cancellationToken);
+    }
+
+    private bool IsTranslationNeeded(string gpkgPath)
+    {
+        var models = GetColumnFromSqliteTable(gpkgPath, "T_ILI2DB_MODEL", "modelName").Select(m => m.ToString());
+        var topics = GetColumnFromSqliteTable(gpkgPath, "T_ILI2DB_BASKET", "topic").Select(m => m.ToString());
+
+        return GetBasketTopicsNotInModels(topics, models).Any();
+    }
+
+    internal IEnumerable<string> GetBasketTopicsNotInModels(IEnumerable<string> topics, IEnumerable<string> models)
+    {
+        var splitModels = models.SelectMany(r => r.Replace("{", "").Replace("}", "").Split(' ')).Distinct().ToList();
+        var importedBasketsModel = topics.Select(r => r.Split('.')[0]).Distinct().ToList();
+
+        return importedBasketsModel.Except(splitModels);
     }
 
     private bool TryCopyTemplateGpkg(Profile profile, out string dataGpkgFilePath)
@@ -71,6 +115,8 @@ public class GwpProcessor : IProcessor
 
         if (!File.Exists(templateGpkgFilePath))
         {
+            logger.LogWarning("No template GeoPackage file found at <{TemplateGpkgFilePath}>.", templateGpkgFilePath);
+
             dataGpkgFilePath = null;
             return false;
         }
@@ -105,7 +151,7 @@ public class GwpProcessor : IProcessor
         return true;
     }
 
-    private async Task<int> ImportLogToGpkg(IFileProvider fileProvider, string gpkgFilePath, Profile profile, CancellationToken cancellationToken)
+    private async Task<int> ImportLogToGpkg(IFileProvider fileProvider, string gpkgFilePath, CancellationToken cancellationToken)
     {
         var logFileName = fileProvider.GetFiles().FirstOrDefault(f => f.EndsWith("_log.xtf", StringComparison.InvariantCultureIgnoreCase));
         var logFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, logFileName);
@@ -115,13 +161,13 @@ public class GwpProcessor : IProcessor
             FilePath = logFilePath,
             FileName = logFileName,
             DbFilePath = gpkgFilePath,
-            Profile = profile,
+            Dataset = "Logs",
         };
 
         return await ilitoolsExecutor.ImportToGpkgAsync(logFileImportRequest, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task<int> ImportTransferFileToGpkg(IFileProvider fileProvider, string gpkgFilePath, string transferFile, Profile profile, CancellationToken cancellationToken)
+    private async Task<int> ImportTransferFileToGpkg(IFileProvider fileProvider, string gpkgFilePath, string transferFile, CancellationToken cancellationToken)
     {
         var transferFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, transferFile);
 
@@ -130,62 +176,94 @@ public class GwpProcessor : IProcessor
             FilePath = transferFilePath,
             FileName = transferFile,
             DbFilePath = gpkgFilePath,
-            Profile = profile,
+            Dataset = "Data",
         };
 
         return await ilitoolsExecutor.ImportToGpkgAsync(transferFileImportRequest, cancellationToken).ConfigureAwait(false);
     }
 
-    private void CreateZip(Guid jobId, Profile profile)
+    private void CreateZip(Guid jobId, NamedFile transferFile, Profile profile)
     {
         logger.LogInformation("Creating ZIP for job <{JobId}>.", jobId);
 
-        var filesToZip = GetFilesToZip(profile);
+        var filesToZip = GetFilesToZip(transferFile, profile);
 
         var zipFileStream = fileProvider.CreateFile(gwpProcessorOptions.ZipFileName);
         using (var archive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
         {
             foreach (var fileToZip in filesToZip)
             {
-                archive.CreateEntryFromFile(fileToZip.FilePath, fileToZip.FileName, CompressionLevel.Optimal);
-                logger.LogTrace("Added file <{FileName}> to ZIP for job <{JobId}>", fileToZip.FileName, jobId);
+                archive.CreateEntryFromFile(fileToZip.FilePath, fileToZip.DisplayName, CompressionLevel.Optimal);
+                logger.LogTrace("Added file <{FileName}> to ZIP for job <{JobId}>", fileToZip.DisplayName, jobId);
             }
         }
 
         logger.LogInformation("Successfully created ZIP for job <{JobId}>.", jobId);
     }
 
-    private List<(string FilePath, string FileName)> GetFilesToZip(Profile profile)
+    private List<NamedFile> GetFilesToZip(NamedFile transferFile, Profile profile)
     {
-        var filesToZip = new List<(string Path, string Name)>();
+        var filesToZip = new List<NamedFile>();
         filesToZip.AddRange(GetLogFilesToZip(fileProvider));
         filesToZip.AddRange(GetAdditionalFilesToZip(fileProvider, profile));
 
         // Add GeoPackage if exists
         var gpkgFilePath = Path.Combine(fileProvider.HomeDirectory.FullName, gwpProcessorOptions.DataGpkgFileName);
         if (File.Exists(gpkgFilePath))
-        {
-            filesToZip.Add((gpkgFilePath, gwpProcessorOptions.DataGpkgFileName));
-        }
+            filesToZip.Add(new NamedFile(gpkgFilePath, gwpProcessorOptions.DataGpkgFileName));
+
+        // Add translated transfer file if exists
+        var translatedTransferFile = GetTranslatedTransferFile(transferFile);
+        if (File.Exists(translatedTransferFile.FilePath))
+            filesToZip.Add(translatedTransferFile);
 
         return filesToZip;
     }
 
-    private IEnumerable<(string FilePath, string FileName)> GetLogFilesToZip(IFileProvider fileProvider)
+    private IEnumerable<NamedFile> GetLogFilesToZip(IFileProvider fileProvider)
     {
         return fileProvider.GetFiles()
             .Where(f => Path.GetFileNameWithoutExtension(f).EndsWith("_log", true, CultureInfo.InvariantCulture))
-            .Select(f => (FilePath: Path.Combine(fileProvider.HomeDirectory.FullName, f), FileName: $"log{Path.GetExtension(f)}"));
+            .Select(f => new NamedFile(Path.Combine(fileProvider.HomeDirectory.FullName, f), $"log{Path.GetExtension(f)}"));
     }
 
-    private IEnumerable<(string FilePath, string FileName)> GetAdditionalFilesToZip(IFileProvider fileProvider, Profile profile)
+    private IEnumerable<NamedFile> GetAdditionalFilesToZip(IFileProvider fileProvider, Profile profile)
     {
         var additionalFilesDirPath = Path.Combine(configDir.FullName, profile.Id, gwpProcessorOptions.AdditionalFilesFolderName);
 
         if (!Directory.Exists(additionalFilesDirPath))
-            return Enumerable.Empty<(string, string)>();
+            return Enumerable.Empty<NamedFile>();
 
         return Directory.GetFiles(additionalFilesDirPath)
-            .Select(f => (FilePath: f, FileName: Path.GetFileName(f)));
+            .Select(f => new NamedFile(f));
+    }
+
+    private IEnumerable<object> GetColumnFromSqliteTable(string dbFilePath, string tableName, string columnName)
+    {
+        var connectionString = $"Data Source={dbFilePath}";
+        using var connection = new SqliteConnection(connectionString);
+        connection.Open();
+
+        using var command = connection.CreateCommand();
+#pragma warning disable CA2100
+        command.CommandText = $"SELECT [{columnName}] FROM [{tableName}]";
+#pragma warning restore CA2100
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            yield return reader.GetValue(0);
+        }
+
+        SqliteConnection.ClearAllPools();
+    }
+
+    private NamedFile GetTranslatedTransferFile(NamedFile transferFile)
+    {
+        var suffix = "_translated.xtf";
+        var fileName = $"{Path.GetFileNameWithoutExtension(transferFile.FileName)}{suffix}";
+        var displayName = $"{Path.GetFileNameWithoutExtension(transferFile.DisplayName)}{suffix}";
+        var path = Path.Combine(fileProvider.HomeDirectory.FullName, fileName);
+        return new NamedFile(path, displayName);
     }
 }

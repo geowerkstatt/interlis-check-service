@@ -73,6 +73,36 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
         }
 
         /// <summary>
+        /// Exports a dataset from a GeoPackage as an INTERLIS transfer file using ili2gpkg.
+        /// </summary>
+        public async Task<int> ExportFromGpkgAsync(ExportRequest exportRequest, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(exportRequest);
+            if (!ilitoolsEnvironment.IsIli2GpkgInitialized) throw new InvalidOperationException("ili2gpkg is not properly initialized.");
+
+            logger.LogInformation("Starting export from <{DbFile}> using ili2gpkg.", exportRequest.DbFilePath);
+
+            try
+            {
+                var command = CreateIli2GpkgExportCommand(exportRequest);
+
+                var exitCode = await ExecuteJavaCommandAsync(command, cancellationToken);
+
+                logger.LogInformation(
+                    "Export completed from <{DbFile}> with exit code {ExitCode}.",
+                    exportRequest.DbFilePath,
+                    exitCode);
+
+                return exitCode;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to execute ili2gpkg for <{DbFile}>.", exportRequest.DbFilePath);
+                return -1;
+            }
+        }
+
+        /// <summary>
         /// Validates a file using the ilivalidator tool.
         /// </summary>
         private async Task<int> ExecuteIlivalidatorAsync(ValidationRequest request, CancellationToken cancellationToken)
@@ -213,6 +243,32 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 "--disableValidation",
                 "--skipReferenceErrors",
                 "--skipGeometryErrors",
+                "--importTid",
+                "--importBid",
+                $"--dataset \"{request.Dataset}\"",
+                $"--dbfile \"{request.DbFilePath}\"",
+            };
+
+            args.AddRange(GetCommonIlitoolsArguments(request));
+            args.Add($"\"{request.FilePath}\"");
+
+            return args.JoinNonEmpty(" ");
+        }
+
+        /// <summary>
+        /// Creates the command for exporting a dataset from a GeoPackage as an INTERLIS transfer file using ili2gpkg.
+        /// </summary>
+        internal string CreateIli2GpkgExportCommand(ExportRequest request)
+        {
+            var args = new List<string>
+            {
+                "-jar",
+                $"\"{ilitoolsEnvironment.Ili2GpkgPath}\"",
+                "--export",
+                "--disableValidation",
+                "--skipReferenceErrors",
+                "--skipGeometryErrors",
+                $"--dataset \"{request.Dataset}\"",
                 $"--dbfile \"{request.DbFilePath}\"",
             };
 
@@ -259,16 +315,13 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
             }
 
             // Add trace if enabled
-            if (ilitoolsEnvironment.TraceEnabled)
-            {
-                yield return "--trace";
-            }
+            if (ilitoolsEnvironment.TraceEnabled) yield return "--trace";
 
             // Add model directory
             yield return $"--modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\"";
 
-            // Add profile
-            yield return $"--metaConfig \"ilidata:{request.Profile.Id}\"";
+            // Add profile if specified
+            if (request.Profile != null) yield return $"--metaConfig \"ilidata:{request.Profile.Id}\"";
         }
 
         /// <summary>

@@ -17,5 +17,5 @@ public interface IProcessor
     /// <param name="transferFile">The transfer file to be processed.</param>
     /// <param name="profile">The profile with which the processing should be done.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to cancel the asynchronous operation.</param>
-    Task Run(Guid jobId, string transferFile, Profile profile, CancellationToken cancellationToken);
+    Task Run(Guid jobId, NamedFile transferFile, Profile profile, CancellationToken cancellationToken);
 }
