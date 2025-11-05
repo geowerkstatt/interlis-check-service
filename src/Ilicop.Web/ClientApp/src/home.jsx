@@ -5,6 +5,7 @@ import { FileDropzone } from "./dropzone";
 import { Title } from "./title";
 import Protokoll from "./protokoll";
 import { UploadForm } from "./uploadForm";
+import MapView from "./mapView";
 
 export const Home = (props) => {
   const {
@@ -170,6 +171,7 @@ export const Home = (props) => {
         fileName={fileToCheck ? fileToCheck.name : ""}
         validationRunning={validationRunning}
       />
+      {statusData?.mapServiceUrl && <MapView wmsUrl={statusData.mapServiceUrl} />}
     </main>
   );
 };
