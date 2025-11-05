@@ -38,24 +38,30 @@ export const App = () => {
   useEffect(() => {
     if (!i18n.language) return;
 
+    const isMdResponse = (res) => res.headers.get("content-type")?.includes("ext/markdown");
+
     fetch(`impressum.${i18n.language}.md`)
-      .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
+      .then((res) => {
+        if (res.ok && isMdResponse(res)) return res;
+        return fetch(`impressum.md`);
+      })
+      .then((res) => isMdResponse(res) && res.text())
       .then((text) => setImpressumContent(text));
 
     fetch(`datenschutz.${i18n.language}.md`)
-      .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
+      .then((res) => isMdResponse(res) && res.text())
       .then((text) => setDatenschutzContent(text));
 
     fetch(`info-hilfe.${i18n.language}.md`)
-      .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
+      .then((res) => isMdResponse(res) && res.text())
       .then((text) => setInfoHilfeContent(text));
 
     fetch(`nutzungsbestimmungen.${i18n.language}.md`)
-      .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
+      .then((res) => isMdResponse(res) && res.text())
       .then((text) => setNutzungsbestimmungenContent(text));
 
     fetch(`banner.${i18n.language}.md`)
-      .then((res) => res.headers.get("content-type")?.includes("ext/markdown") && res.text())
+      .then((res) => isMdResponse(res) && res.text())
       .then((text) => setBannerContent(text));
 
     fetch(`quickstart.${i18n.language}.txt`)
