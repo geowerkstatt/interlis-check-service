@@ -7,10 +7,10 @@
     },
     "about": {
         "title": "À propos",
-        "text": "Pour la visualisation et le traitement ultérieur des journaux de validation, nous recommandons d'utiliser le <1>XTFLog-Checker</1> dans QGIS.",
+        "text": "Pour la visualisation et le traitement ultérieur des journaux de validation, nous recommandons d'utiliser le <0>XTFLog-Checker</0> dans QGIS.",
         "versionInformation": "Informations sur la version",
         "developmentAndBugTrackingTitle": "Développement et suivi des bogues",
-        "developmentAndBugTrackingText": "Le code est disponible sous la <1>GNU Affero General Public License v3.0 (AGPL-3.0)</1> version 3 dans le <3>dépôt GitHub</3>. Si vous rencontrez des bogues, vous pouvez y ouvrir un <5>Issue</5>.",
+        "developmentAndBugTrackingText": "Le code est disponible sous la <0>GNU Affero General Public License v3.0 (AGPL-3.0)</0> version 3 dans le <1>dépôt GitHub</1>. Si vous rencontrez des bogues, vous pouvez y ouvrir un <2>Issue</2>.",
         "licenceInformation": "Informations sur la licence"
     },
     "dropzone": {

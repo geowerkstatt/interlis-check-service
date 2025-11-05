@@ -7,10 +7,10 @@
     },
     "about": {
         "title": "About",
-        "text": "Zur Visualisierung und weiteren Bearbeitung der Validierungslogs empfehlen wir die Verwendung des <1>XTFLog-Checker</1> im QGIS.",
+        "text": "Zur Visualisierung und weiteren Bearbeitung der Validierungslogs empfehlen wir die Verwendung des <0>XTFLog-Checker</0> im QGIS.",
         "versionInformation": "Versionsinformationen",
         "developmentAndBugTrackingTitle": "Entwicklung und Bugtracking",
-        "developmentAndBugTrackingText": "Der Code steht unter der <1>GNU Affero General Public License v3.0 (AGPL-3.0)</1> Version 3 im <3>GitHub Repository</3> zur Verfügung. Falls Ihnen Bugs begegnen, können Sie dort ein <5>Issue</5> eröffnen.",
+        "developmentAndBugTrackingText": "Der Code steht unter der <0>GNU Affero General Public License v3.0 (AGPL-3.0)</0> Version 3 im <1>GitHub Repository</1> zur Verfügung. Falls Ihnen Bugs begegnen, können Sie dort ein <2>Issue</2> eröffnen.",
         "licenceInformation": "Lizenzinformationen"
     },
     "dropzone": {

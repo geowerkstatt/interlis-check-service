@@ -9,7 +9,6 @@ export const About = (props) => {
       <h1>{t("about.title")}</h1>
       <p>
         <Trans i18nKey="about.text">
-          Zur Visualisierung und weiteren Bearbeitung der Validierungslogs empfehlen wir die Verwendung des 
           <a
             href="https://plugins.qgis.org/plugins/xtflog_checker/"
             title="XTFLog-Checker"
@@ -17,8 +16,7 @@ export const About = (props) => {
             rel="noreferrer"
           >
             XTFLog-Checker
-          </a>{" "}
-          im QGIS.
+          </a>
         </Trans>
       </p>
       <h2>{t("about.versionInformation")}</h2>
@@ -32,15 +30,12 @@ export const About = (props) => {
       <h2>{t("about.developmentAndBugTrackingTitle")}</h2>
       <p>
         <Trans i18nKey="about.developmentAndBugTrackingText">
-          Der Code steht unter der
           <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">
             GNU Affero General Public License v3.0 (AGPL-3.0)
           </a>
-          Version 3 im
           <a href="https://github.com/geowerkstatt/interlis-check-service" target="_blank" rel="noopener noreferrer">
             GitHub Repository
           </a>
-          zur Verfügung. Falls Ihnen Bugs begegnen, können Sie dort ein
           <a
             href="https://github.com/geowerkstatt/interlis-check-service/issues"
             target="_blank"
@@ -48,7 +43,6 @@ export const About = (props) => {
           >
             Issue
           </a>
-          eröffnen.
         </Trans>
       </p>
       <h2>{t("about.licenceInformation")}</h2>
