@@ -3,6 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { MdCancel, MdFileUpload } from "react-icons/md";
 import styled from "styled-components";
 import { Spinner } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 
 const getColor = (props) => {
   if (props.isDragActive) {
@@ -39,6 +40,7 @@ export const FileDropzone = ({
   resetForm,
 }) => {
   const [dropZoneError, setDropZoneError] = useState(undefined);
+  const { t } = useTranslation();
 
   const onDropAccepted = useCallback(
     (acceptedFiles) => {
@@ -55,22 +57,26 @@ export const FileDropzone = ({
       const errorCode = fileRejections[0].errors[0].code;
       switch (errorCode) {
         case "file-invalid-type":
-          setDropZoneError(
-            `Der Dateityp wird nicht unterstützt. Bitte wähle eine Datei (max. 200MB) mit einer der folgenden Dateiendungen: ${acceptedFileTypes}`
-          );
+          setDropZoneError({
+            key: "dropzone.error.fileInvalidType",
+            params: { acceptedFileTypes },
+          });
           break;
         case "too-many-files":
-          setDropZoneError("Es kann nur eine Datei aufs Mal geprüft werden.");
+          setDropZoneError({
+            key: "dropzone.error.tooManyFiles",
+          });
           break;
         case "file-too-large":
-          setDropZoneError(
-            "Die ausgewählte Datei ist über 200MB gross. Bitte wähle eine kleinere Datei oder erstelle eine ZIP-Datei."
-          );
+          setDropZoneError({
+            key: "dropzone.error.fileTooLarge",
+          });
           break;
         default:
-          setDropZoneError(
-            `Bitte wähle eine Datei (max. 200MB) mit einer der folgenden Dateiendungen: ${acceptedFileTypes}`
-          );
+          setDropZoneError({
+            key: "dropzone.error.default",
+            params: { acceptedFileTypes },
+          });
       }
       resetForm();
     },
@@ -96,7 +102,7 @@ export const FileDropzone = ({
         <input {...getInputProps()} />
         {!(fileToCheck || dropZoneError) && (
           <div className="dropzone dropzone-text-disabled">
-            Datei {acceptedFileTypes} hier ablegen oder klicken um vom lokalen Dateisystem auszuwählen.
+            {t("dropzone.info", { acceptedFileTypes })}
             <p className="drop-icon">
               <MdFileUpload />
             </p>
@@ -117,7 +123,7 @@ export const FileDropzone = ({
         )}
         {dropZoneError && (
           <div className="dropzone dropzone-text-error">
-            {dropZoneError}
+            {t(dropZoneError.key, dropZoneError.params)}
             <p className="drop-icon">
               <MdFileUpload />
             </p>

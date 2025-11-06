@@ -34,38 +34,38 @@ namespace Geowerkstatt.Ilicop.Web
             {
                 try
                 {
-                    UpdateJobStatus(item.Id, Status.Processing, "Die Datei wird validiert...");
+                    UpdateJobStatus(item.Id, Status.Processing, "Validating file");
                     await item.Task(stoppingToken);
-                    UpdateJobStatus(item.Id, Status.Completed, "Die Daten sind modellkonform.");
+                    UpdateJobStatus(item.Id, Status.Completed, "Validation successful");
                 }
                 catch (UnknownExtensionException ex)
                 {
-                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, $"Die Dateiendung {ex.FileExtension} ist nicht erlaubt.", ex.Message);
+                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "File extension not allowed", ex.Message);
                 }
                 catch (MultipleTransferFileFoundException ex)
                 {
-                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, $"Es wurden mehrere Transferdateien mit der Dateiendung <{ex.FileExtension}> gefunden.", ex.Message);
+                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "Multiple transfer files found", ex.Message);
                 }
                 catch (TransferFileNotFoundException ex)
                 {
-                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "Es konnte keine gültige Transferdatei gefunden werden.", ex.Message);
+                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "No transfer file found", ex.Message);
                 }
                 catch (GeoPackageException ex)
                 {
-                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "Die Modellnamen konnten nicht aus der GeoPackage Datenbank gelesen werden.", ex.Message);
+                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "Could not read model names from GeoPackage", ex.Message);
                 }
                 catch (InvalidXmlException ex)
                 {
-                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "Die XML-Struktur der Transferdatei ist ungültig.", ex.Message);
+                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "Invalid XML structure", ex.Message);
                 }
                 catch (ValidationFailedException ex)
                 {
-                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "Die Daten sind nicht modellkonform.", ex.Message);
+                    UpdateJobStatus(item.Id, Status.CompletedWithErrors, "Data not conform to INTERLIS model", ex.Message);
                 }
                 catch (Exception ex)
                 {
                     var traceId = Guid.NewGuid();
-                    UpdateJobStatus(item.Id, Status.Failed, $"Unbekannter Fehler. Fehler-Id: <{traceId}>");
+                    UpdateJobStatus(item.Id, Status.Failed, $"Unknown error. Error ID: <{traceId}>");
                     logger.LogError(ex, "Unhandled exception TraceId: <{TraceId}> Message: <{ErrorMessage}>", traceId, ex.Message);
                 }
             });
@@ -74,7 +74,7 @@ namespace Geowerkstatt.Ilicop.Web
         /// <inheritdoc/>
         public async Task EnqueueJobAsync(Guid jobId, Func<CancellationToken, Task> action)
         {
-            UpdateJobStatus(jobId, Status.Enqueued, "Die Validierung wird vorbereitet...");
+            UpdateJobStatus(jobId, Status.Enqueued, "Preparing validation");
             await queue.Writer.WriteAsync((jobId, action));
         }
 

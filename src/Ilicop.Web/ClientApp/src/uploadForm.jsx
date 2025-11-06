@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
 import { ProfileDropdown } from "./profileDropdown";
+import { Trans, useTranslation } from "react-i18next";
 
 export const UploadForm = ({
   nutzungsbestimmungenAvailable,
@@ -13,6 +14,8 @@ export const UploadForm = ({
   selectedProfile,
   setSelectedProfile,
 }) => {
+  const { t } = useTranslation();
+
   const onChangeNutzungsbestimmungen = useCallback(
     (e) => {
       setCheckedNutzungsbestimmungen(e.target.checked);
@@ -35,10 +38,12 @@ export const UploadForm = ({
                       disabled={validationRunning}
                     />
                     <Form.Check.Label>
-                      Ich akzeptiere die{" "}
-                      <b type="button" onClick={showNutzungsbestimmungen}>
-                        Nutzungsbedingungen
-                      </b>
+                      <Trans i18nKey="uploadForm.acceptTerms">
+                        Ich akzeptiere die
+                        <b type="button" onClick={showNutzungsbestimmungen}>
+                          Nutzungsbedingungen
+                        </b>
+                      </Trans>
                     </Form.Check.Label>
                   </Form.Check>
                 </Form.Group>
@@ -53,21 +58,21 @@ export const UploadForm = ({
               <Row>
                 <Col className="d-grid">
                   <Button variant="outline-dark" onClick={resetForm}>
-                    Abbrechen
+                    {t("common.cancel")}
                   </Button>
                 </Col>
                 <Col className="d-grid">
                   {validationRunning ? (
                     <Button className="check-button" disabled>
-                      Validierung läuft...
+                      {t("uploadForm.validationRunning")}
                     </Button>
                   ) : (
                     <Button
                       className="check-button"
-                      onClick={startValidation}
+                      onClick={() => startValidation()}
                       disabled={nutzungsbestimmungenAvailable && !checkedNutzungsbestimmungen}
                     >
-                      Validieren
+                      {t("common.validate")}
                     </Button>
                   )}
                 </Col>

@@ -23,32 +23,24 @@ export const Home = (props) => {
   const [checkedNutzungsbestimmungen, setCheckedNutzungsbestimmungen] = useState(false);
   const [isFirstValidation, setIsFirstValidation] = useState(true);
   const [log, setLog] = useState([]);
-  const [uploadLogsInterval, setUploadLogsInterval] = useState(0);
-  const [uploadLogsEnabled, setUploadLogsEnabled] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
 
-  // Enable Upload logging
-  useEffect(() => uploadLogsInterval && setUploadLogsEnabled(true), [uploadLogsInterval]);
-  useEffect(() => !uploadLogsEnabled && clearInterval(uploadLogsInterval), [uploadLogsEnabled, uploadLogsInterval]);
+  const resetLog = () => setLog([]);
 
-  const resetLog = useCallback(() => setLog([]), [setLog]);
-  const updateLog = useCallback(
-    (message, { disableUploadLogs = true } = {}) => {
-      if (disableUploadLogs) setUploadLogsEnabled(false);
-      setLog((log) => {
-        if (message === log[log.length - 1]) return log;
-        else return [...log, message];
-      });
-    },
-    [setUploadLogsEnabled]
-  );
+  const updateLog = (messageKey, messageParams = {}) => {
+    setLog((log) => {
+      if (messageKey === log[log.length - 1]?.messageKey) return log;
+
+      const newLogEntry = { messageKey: messageKey, messageParams: messageParams };
+      return [...log, newLogEntry];
+    });
+  };
 
   // Reset log and abort upload on file change
   useEffect(() => {
     resetLog();
     setStatusData(null);
     setValidationRunning(false);
-    setUploadLogsEnabled(false);
     if (statusInterval) clearInterval(statusInterval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileToCheck]);
@@ -63,17 +55,15 @@ export const Home = (props) => {
     }
   }, [validationRunning, isFirstValidation, setShowBannerContent, setIsFirstValidation]);
 
-  const logUploadLogMessages = () => updateLog(`${fileToCheck.name} hochladen...`, { disableUploadLogs: false });
   const setIntervalImmediately = (func, interval) => {
     func();
     return setInterval(func, interval);
   };
-  const checkFile = (e) => {
-    e.stopPropagation();
+  const checkFile = () => {
     resetLog();
     setStatusData(null);
     setValidationRunning(true);
-    setUploadLogsInterval(setIntervalImmediately(logUploadLogMessages, 2000));
+    updateLog("log.uploadingFile", { fileName: fileToCheck.name });
     uploadFile(fileToCheck);
   };
 
@@ -101,7 +91,7 @@ export const Home = (props) => {
 
         const interval = setIntervalImmediately(async () => {
           const statusData = await getStatusData(data);
-          updateLog(statusData.statusMessage);
+          updateLog(`log.apiMessages.${statusData.statusMessage}`, { defaultValue: statusData.statusMessage });
           if (
             statusData.status === "completed" ||
             statusData.status === "completedWithErrors" ||
@@ -116,7 +106,7 @@ export const Home = (props) => {
       }
     } else {
       console.log("Error while uploading file: " + response.json());
-      updateLog("Der Upload war nicht erfolgreich. Die Validierung wurde abgebrochen.");
+      updateLog("log.uploadFailed");
       setValidationRunning(false);
     }
   };
@@ -126,9 +116,7 @@ export const Home = (props) => {
     setValidationRunning(false);
     setCheckedNutzungsbestimmungen(false);
     setSelectedProfile(null);
-    setUploadLogsEnabled(false);
-    if (uploadLogsInterval) clearInterval(uploadLogsInterval);
-  }, [setFileToCheck, setValidationRunning, setUploadLogsEnabled, uploadLogsInterval]);
+  }, [setFileToCheck, setValidationRunning]);
 
   return (
     <main>

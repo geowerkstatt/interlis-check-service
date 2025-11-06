@@ -2,6 +2,7 @@ import "./app.css";
 import React from "react";
 import About from "./about";
 import { Button } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 
 export const Footer = (props) => {
   const {
@@ -15,6 +16,8 @@ export const Footer = (props) => {
     licenseInfo,
   } = props;
 
+  const { t } = useTranslation();
+
   return (
     <footer className="footer-style">
       {infoHilfeContent && (
@@ -23,7 +26,7 @@ export const Footer = (props) => {
           className="footer-button no-outline-on-focus"
           onClick={() => openModalContent(infoHilfeContent, "markdown")}
         >
-          INFO & HILFE
+          {t("footer.infoHelp").toUpperCase()}
         </Button>
       )}
       {nutzungsbestimmungenContent && (
@@ -32,7 +35,7 @@ export const Footer = (props) => {
           className="footer-button no-outline-on-focus"
           onClick={() => openModalContent(nutzungsbestimmungenContent, "markdown")}
         >
-          NUTZUNGSBESTIMMUNGEN
+          {t("footer.termsOfUse").toUpperCase()}
         </Button>
       )}
       {datenschutzContent && (
@@ -41,7 +44,7 @@ export const Footer = (props) => {
           className="footer-button no-outline-on-focus"
           onClick={() => openModalContent(datenschutzContent, "markdown")}
         >
-          DATENSCHUTZ
+          {t("footer.privacy").toUpperCase()}
         </Button>
       )}
       {impressumContent && (
@@ -50,7 +53,7 @@ export const Footer = (props) => {
           className="footer-button no-outline-on-focus"
           onClick={() => openModalContent(impressumContent, "markdown")}
         >
-          IMPRESSUM
+          {t("footer.imprint").toUpperCase()}
         </Button>
       )}
       <Button
@@ -63,7 +66,7 @@ export const Footer = (props) => {
           )
         }
       >
-        ABOUT
+        {t("footer.about").toUpperCase()}
       </Button>
     </footer>
   );

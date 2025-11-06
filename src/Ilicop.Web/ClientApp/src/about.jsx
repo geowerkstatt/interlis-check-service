@@ -1,22 +1,25 @@
+import { useTranslation, Trans } from "react-i18next";
+
 export const About = (props) => {
   const { clientSettings, licenseInfo } = props;
+  const { t } = useTranslation();
 
   return (
     <div>
-      <h1>About</h1>
+      <h1>{t("about.title")}</h1>
       <p>
-        Zur Visualisierung und weiteren Bearbeitung der Validierungslogs empfehlen wir die Verwendung des{" "}
-        <a
-          href="https://plugins.qgis.org/plugins/xtflog_checker/"
-          title="XTFLog-Checker"
-          target="_blank"
-          rel="noreferrer"
-        >
-          XTFLog-Checker
-        </a>{" "}
-        im QGIS.
+        <Trans i18nKey="about.text">
+          <a
+            href="https://plugins.qgis.org/plugins/xtflog_checker/"
+            title="XTFLog-Checker"
+            target="_blank"
+            rel="noreferrer"
+          >
+            XTFLog-Checker
+          </a>
+        </Trans>
       </p>
-      <h2>Versionsinformationen</h2>
+      <h2>{t("about.versionInformation")}</h2>
       <p>
         <b>{clientSettings?.applicationName}</b>: {clientSettings?.applicationVersion}
         <br></br>
@@ -24,27 +27,25 @@ export const About = (props) => {
         <br></br>
         <b>ili2gpkg</b>: {clientSettings?.ili2gpkgVersion}
       </p>
-      <h2>Entwicklung und Bugtracking</h2>
+      <h2>{t("about.developmentAndBugTrackingTitle")}</h2>
       <p>
-        Der Code steht unter der{" "}
-        <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">
-          GNU Affero General Public License v3.0 (AGPL-3.0)
-        </a>{" "}
-        Version 3 im{" "}
-        <a href="https://github.com/geowerkstatt/interlis-check-service" target="_blank" rel="noopener noreferrer">
-          GitHub Repository
-        </a>{" "}
-        zur Verfügung. Falls Ihnen Bugs begegnen, können Sie dort ein{" "}
-        <a
-          href="https://github.com/geowerkstatt/interlis-check-service/issues"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Issue
-        </a>{" "}
-        eröffnen.
+        <Trans i18nKey="about.developmentAndBugTrackingText">
+          <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank" rel="noopener noreferrer">
+            GNU Affero General Public License v3.0 (AGPL-3.0)
+          </a>
+          <a href="https://github.com/geowerkstatt/interlis-check-service" target="_blank" rel="noopener noreferrer">
+            GitHub Repository
+          </a>
+          <a
+            href="https://github.com/geowerkstatt/interlis-check-service/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Issue
+          </a>
+        </Trans>
       </p>
-      <h2>Lizenzinformationen</h2>
+      <h2>{t("about.licenceInformation")}</h2>
       {Object.keys(licenseInfo).map((key) => (
         <div key={key} className="about-licenses">
           <h3>

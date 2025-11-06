@@ -1,4 +1,5 @@
 import groupBy from "object.groupby";
+import i18n from "./i18n";
 
 const constraintPatterns = [
   ["Mandatory Constraint", /^validate mandatory constraint (\S+)\.\.\.$/],
@@ -78,7 +79,7 @@ class LogHierarchyBuilder {
       const warnings = Array.from(this.otherWarningMessages).map((message) => ({ message, type: "Warning" }));
 
       hierarchicalEntries.push({
-        message: "Weitere Meldungen",
+        message: i18n.t("logHierarchy.otherMessages"),
         type: this.otherErrorMessages.size > 0 ? "Error" : "Warning",
         values: errors.concat(warnings),
       });

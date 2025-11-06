@@ -1,8 +1,34 @@
 ﻿import { useCallback, useState, useEffect } from "react";
 import { Col, Form, Row } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+
+// Helper function to get display text for a profile in the correct language
+const getLocalisedProfileTitle = (profile, language) => {
+  if (!profile.titles || profile.titles.length === 0) {
+    return profile.id;
+  }
+
+  const localTitle = profile.titles.find((title) => title.language === language);
+  if (localTitle && localTitle.text) {
+    return localTitle.text;
+  }
+
+  const fallbackTitle = profile.titles.find((title) => !title.language);
+  if (fallbackTitle) {
+    return fallbackTitle.text;
+  }
+
+  const firstTitle = profile.titles.find((title) => title.text);
+  if (firstTitle) {
+    return firstTitle.text;
+  }
+
+  return profile.id;
+};
 
 export const ProfileDropdown = ({ selectedProfile, onProfileChange, disabled = false }) => {
   const [profiles, setProfiles] = useState([]);
+  const { i18n, t } = useTranslation();
 
   // Load profiles from API
   useEffect(() => {
@@ -27,30 +53,6 @@ export const ProfileDropdown = ({ selectedProfile, onProfileChange, disabled = f
     }
   }, [onProfileChange, profiles]);
 
-  // Helper function to get display text for a profile
-  const getProfileDisplayText = useCallback((profile) => {
-    if (!profile.titles || profile.titles.length === 0) {
-      return profile.id;
-    }
-
-    // Look for German title first
-    const germanTitle = profile.titles.find((title) => title.language === "de");
-    if (germanTitle) {
-      return germanTitle.text || profile.id;
-    }
-
-    // Fallback to title with no language or empty language
-    const fallbackTitle = profile.titles.find(
-      (title) => title.language === null || title.language === "" || title.language === undefined
-    );
-    if (fallbackTitle) {
-      return fallbackTitle.text;
-    }
-
-    // Final fallback to profile ID
-    return profile.id;
-  }, []);
-
   const handleChange = useCallback(
     (e) => {
       onProfileChange?.(e.target.value);
@@ -68,12 +70,12 @@ export const ProfileDropdown = ({ selectedProfile, onProfileChange, disabled = f
   } else {
     return (
       <Form.Group as={Row} className="mb-3">
-        <Form.Label column>Profil</Form.Label>
+        <Form.Label column>{t("common.profile")}</Form.Label>
         <Col md="10">
           <Form.Control as="select" value={selectedProfile} onChange={handleChange} disabled={disabled}>
             {profiles.map((profile) => (
               <option key={profile.id} value={profile.id}>
-                {getProfileDisplayText(profile)}
+                {getLocalisedProfileTitle(profile, i18n.language)}
               </option>
             ))}
           </Form.Control>

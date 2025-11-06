@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "react-bootstrap";
 import LogDisplayEntry from "./logDisplayEntry";
 import { createLogHierarchy } from "./logHierarchy";
+import { useTranslation } from "react-i18next";
 
 /**
  * Displays the log entries of a validation in a hierarchical structure.
@@ -9,6 +10,7 @@ import { createLogHierarchy } from "./logHierarchy";
 export const LogDisplay = ({ statusData }) => {
   const jsonLogUrl = statusData?.jsonLogUrl;
   const [logData, setLogData] = useState(null);
+  const { i18n } = useTranslation();
 
   // Fetch validator log and convert it to a hierarchical structure
   useEffect(() => {
@@ -21,7 +23,7 @@ export const LogDisplay = ({ statusData }) => {
         }
       }
     })();
-  }, [jsonLogUrl]);
+  }, [jsonLogUrl, i18n.language]);
 
   return (
     logData &&
