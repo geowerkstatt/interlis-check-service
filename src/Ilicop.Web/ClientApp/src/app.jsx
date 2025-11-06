@@ -7,6 +7,22 @@ import Footer from "./footer";
 import Header from "./header";
 import { useTranslation } from "react-i18next";
 
+const responseHasContentType = (res, expectedContentType) =>
+  res.headers.get("content-type")?.includes(expectedContentType);
+
+const fetchLocalizedContent = (fileName, language, expectedContentType, fileExtension) => {
+  return fetch(`${fileName}.${language}.${fileExtension}`)
+    .then((res) => {
+      if (res.ok && responseHasContentType(res, expectedContentType)) return res;
+      return fetch(`${fileName}.${fileExtension}`);
+    })
+    .then((res) => (responseHasContentType(res, expectedContentType) ? res.text() : null));
+};
+
+const fetchLocalizedTextFile = (fileName, language) => fetchLocalizedContent(fileName, language, "text/plain", "txt");
+const fetchLocalizedMarkdownFile = (fileName, language) =>
+  fetchLocalizedContent(fileName, language, "ext/markdown", "md");
+
 export const App = () => {
   const [modalContent, setModalContent] = useState(false);
   const [modalContentType, setModalContentType] = useState(null);
@@ -38,42 +54,21 @@ export const App = () => {
   useEffect(() => {
     if (!i18n.language) return;
 
-    const isMdResponse = (res) => res.headers.get("content-type")?.includes("ext/markdown");
-
-    fetch(`impressum.${i18n.language}.md`)
-      .then((res) => {
-        if (res.ok && isMdResponse(res)) return res;
-        return fetch(`impressum.md`);
-      })
-      .then((res) => isMdResponse(res) && res.text())
-      .then((text) => setImpressumContent(text));
-
-    fetch(`datenschutz.${i18n.language}.md`)
-      .then((res) => isMdResponse(res) && res.text())
-      .then((text) => setDatenschutzContent(text));
-
-    fetch(`info-hilfe.${i18n.language}.md`)
-      .then((res) => isMdResponse(res) && res.text())
-      .then((text) => setInfoHilfeContent(text));
-
-    fetch(`nutzungsbestimmungen.${i18n.language}.md`)
-      .then((res) => isMdResponse(res) && res.text())
-      .then((text) => setNutzungsbestimmungenContent(text));
-
-    fetch(`banner.${i18n.language}.md`)
-      .then((res) => isMdResponse(res) && res.text())
-      .then((text) => setBannerContent(text));
-
-    fetch(`quickstart.${i18n.language}.txt`)
-      .then((res) => res.headers.get("content-type")?.includes("text/plain") && res.text())
-      .then((text) => setQuickStartContent(text));
+    fetchLocalizedMarkdownFile("impressum", i18n.language).then((text) => setImpressumContent(text));
+    fetchLocalizedMarkdownFile("datenschutz", i18n.language).then((text) => setDatenschutzContent(text));
+    fetchLocalizedMarkdownFile("info-hilfe", i18n.language).then((text) => setInfoHilfeContent(text));
+    fetchLocalizedMarkdownFile("banner", i18n.language).then((text) => setBannerContent(text));
+    fetchLocalizedTextFile("quickstart", i18n.language).then((text) => setQuickStartContent(text));
+    fetchLocalizedMarkdownFile("nutzungsbestimmungen", i18n.language).then((text) =>
+      setNutzungsbestimmungenContent(text)
+    );
 
     fetch("license.json")
-      .then((res) => res.headers.get("content-type")?.includes("application/json") && res.json())
+      .then((res) => responseHasContentType(res, "application/json") && res.json())
       .then((json) => setLicenseInfo(json));
 
     fetch("license.custom.json")
-      .then((res) => res.headers.get("content-type")?.includes("application/json") && res.json())
+      .then((res) => responseHasContentType(res, "application/json") && res.json())
       .then((json) => setLicenseInfoCustom(json));
   }, [i18n.language]);
 
