@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'csharp', 'javascript' ]
+        language: [ 'csharp', 'javascript', 'actions' ]
 
     steps:
     - name: Add GitHub NuGet Registry
