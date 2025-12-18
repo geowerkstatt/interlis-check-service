@@ -3,6 +3,10 @@ name: Ci
 on:
   push:
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest

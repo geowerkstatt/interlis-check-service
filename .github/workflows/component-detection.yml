@@ -1,0 +1,40 @@
+name: Component Detection
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  component-detection:
+    runs-on: ubuntu-latest
+    name: Restore and detect components
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0'
+
+      - name: Add GitHub NuGet Registry
+        run: dotnet nuget add source --username "${{ github.actor }}" --password "%GITHUB_TOKEN%" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/GeoWerkstatt/index.json"
+
+      - name: Install dependencies
+        run: dotnet restore
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Run manual component detection for NuGet after
+      # restoring packages from the GitHub registry.
+      - name: NuGet component detection
+        uses: advanced-security/component-detection-dependency-submission-action@v0.1.0
+        with:
+          detectorsCategories: NuGet

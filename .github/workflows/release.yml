@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Retag Docker image as latest
 
+    permissions:
+      packages: write
+
     steps:
       - name: Set environment variables
         run: |
@@ -50,6 +53,10 @@ jobs:
   patch-changelog:
     runs-on: ubuntu-latest
     name: Patch CHANGELOG.md and update GitHub release notes
+
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
