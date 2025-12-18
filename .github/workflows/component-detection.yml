@@ -1,4 +1,4 @@
-name: Ci
+name: Component Detection
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
 jobs:
   component-detection:
     runs-on: ubuntu-latest
-    name: Run build, test and lint
+    name: Restore and detect components
 
     steps:
       - name: Checkout repository
