@@ -33,7 +33,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.repository_owner  }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Pull docker image
         run: docker pull ${{ env.IMAGE_NAME }}:v${{ env.VERSION }}
 
@@ -53,11 +53,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GEOW_BOT_TOKEN }}
           persist-credentials: true
-      
+
       - name: Set environment variables
         run: |
           echo GIT_BRANCH_NAME=mark-version-${TAG_NAME#v}-as-released >> $GITHUB_ENV
