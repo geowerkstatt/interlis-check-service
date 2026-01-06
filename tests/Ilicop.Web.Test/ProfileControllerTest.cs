@@ -69,7 +69,7 @@ public sealed class ProfileControllerTest
 
         Assert.IsInstanceOfType(response, typeof(OkObjectResult));
         Assert.IsInstanceOfType(response.Value, typeof(List<Profile>));
-        Assert.AreEqual(0, ((List<Profile>)response.Value).Count);
+        Assert.IsEmpty((List<Profile>)response.Value);
         Assert.AreEqual(StatusCodes.Status200OK, response.StatusCode);
     }
 

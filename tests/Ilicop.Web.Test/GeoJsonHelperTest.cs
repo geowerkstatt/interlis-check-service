@@ -45,7 +45,7 @@ namespace Geowerkstatt.Ilicop.Web
             };
 
             var featureCollection = GeoJsonHelper.CreateFeatureCollection(logResult);
-            Assert.AreEqual(1, featureCollection.Count);
+            Assert.HasCount(1, featureCollection);
 
             var geoJson = JsonSerializer.Serialize(featureCollection, serializerOptions);
             Assert.AreEqual("{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[8.376399953106437,47.02016965999489]},\"properties\":{\"type\":\"Error\",\"message\":\"Error message 1\",\"objTag\":\"Model.Topic.Class\",\"dataSource\":null,\"line\":11,\"techDetails\":null}}]}", geoJson);

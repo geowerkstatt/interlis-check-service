@@ -15,7 +15,7 @@ namespace Geowerkstatt.Ilicop.Web.XtfLog
 
             var logEntries = XtfLogParser.Parse(reader);
 
-            Assert.AreEqual(2, logEntries.Count);
+            Assert.HasCount(2, logEntries);
 
             var first = logEntries[0];
             Assert.AreEqual("1", first.Tid);
@@ -56,7 +56,7 @@ namespace Geowerkstatt.Ilicop.Web.XtfLog
 
             var logEntries = XtfLogParser.Parse(reader);
 
-            Assert.AreEqual(0, logEntries.Count);
+            Assert.IsEmpty(logEntries);
         }
     }
 }

@@ -65,7 +65,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             Assert.AreEqual(jobId, ((StatusResponse)response.Value).JobId);
             Assert.AreEqual(Status.Processing, ((StatusResponse)response.Value).Status);
             Assert.AreEqual("WAFFLESPATULA GREENNIGHT", ((StatusResponse)response.Value).StatusMessage);
-            Assert.AreEqual(null, ((StatusResponse)response.Value).LogUrl);
+            Assert.IsNull(((StatusResponse)response.Value).LogUrl);
             Assert.AreEqual($"/api/v8/download?jobId={jobId}&logType=xtf", ((StatusResponse)response.Value).XtfLogUrl.ToString());
             Assert.AreEqual($"/api/v8/download/json?jobId={jobId}", ((StatusResponse)response.Value).JsonLogUrl.ToString());
             Assert.IsNull(((StatusResponse)response.Value).GeoJsonLogUrl);
