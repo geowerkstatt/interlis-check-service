@@ -52,8 +52,8 @@ public sealed class ProfileControllerTest
 
         var response = await controller.GetAll() as OkObjectResult;
 
-        Assert.IsInstanceOfType(response, typeof(OkObjectResult));
-        Assert.IsInstanceOfType(response.Value, typeof(IEnumerable<Profile>));
+        Assert.IsInstanceOfType<OkObjectResult>(response);
+        Assert.IsInstanceOfType<List<Profile>>(response.Value);
         Assert.AreEqual(StatusCodes.Status200OK, response.StatusCode);
         CollectionAssert.AreEqual(profiles, (List<Profile>)response.Value);
     }
@@ -67,9 +67,9 @@ public sealed class ProfileControllerTest
 
         var response = await controller.GetAll() as ObjectResult;
 
-        Assert.IsInstanceOfType(response, typeof(OkObjectResult));
-        Assert.IsInstanceOfType(response.Value, typeof(List<Profile>));
-        Assert.AreEqual(0, ((List<Profile>)response.Value).Count);
+        Assert.IsInstanceOfType<OkObjectResult>(response);
+        Assert.IsInstanceOfType<List<Profile>>(response.Value);
+        Assert.IsEmpty((List<Profile>)response.Value);
         Assert.AreEqual(StatusCodes.Status200OK, response.StatusCode);
     }
 
@@ -83,8 +83,8 @@ public sealed class ProfileControllerTest
         var response = await controller.GetAll() as ObjectResult;
         var problemDetails = response?.Value as ProblemDetails;
 
-        Assert.IsInstanceOfType(response, typeof(ObjectResult));
-        Assert.IsInstanceOfType(problemDetails, typeof(ProblemDetails));
+        Assert.IsInstanceOfType<ObjectResult>(response);
+        Assert.IsInstanceOfType<ProblemDetails>(problemDetails);
         Assert.AreEqual(StatusCodes.Status500InternalServerError, response.StatusCode);
         Assert.AreEqual("Internal Server Error", problemDetails.Title);
         Assert.AreEqual("Error while loading profiles", problemDetails.Detail);

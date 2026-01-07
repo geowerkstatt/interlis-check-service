@@ -241,7 +241,8 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                 var versions = Directory.GetDirectories(toolDir)
                     .Select(Path.GetFileName)
                     .Where(v => !string.IsNullOrEmpty(v))
-                    .OrderBy(v => new Version(v))
+                    .Select(v => new Version(v))
+                    .Order()
                     .ToList();
 
                 if (versions.Count == 0)
@@ -250,7 +251,7 @@ namespace Geowerkstatt.Ilicop.Web.Ilitools
                     return null;
                 }
 
-                var latestVersion = versions.LastOrDefault() ?? null;
+                var latestVersion = versions.LastOrDefault()?.ToString() ?? null;
                 logger.LogDebug("Latest installed version for {Ilitool}: {Version}", ilitool, latestVersion);
                 return latestVersion;
             }

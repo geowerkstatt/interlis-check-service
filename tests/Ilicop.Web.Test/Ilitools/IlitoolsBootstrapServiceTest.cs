@@ -87,7 +87,7 @@ namespace Geowerkstatt.Ilicop.Ilitools
             Assert.IsTrue(Directory.Exists(installDir), "Install directory should exist");
 
             var files = Directory.GetFiles(installDir, "*", SearchOption.AllDirectories);
-            Assert.IsTrue(files.Length > 0, "Files should be extracted");
+            Assert.IsNotEmpty(files, "Files should be extracted");
         }
 
         [TestMethod]

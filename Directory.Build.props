@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/geowerkstatt/interlis-check-service</PackageProjectUrl>
     <RepositoryUrl>https://github.com/geowerkstatt/interlis-check-service.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AnalysisLevel>8.0-recommended</AnalysisLevel>
+    <AnalysisLevel>10.0-recommended</AnalysisLevel>
     <RootNamespace>Geowerkstatt.Ilicop.Web</RootNamespace>
   </PropertyGroup>
 

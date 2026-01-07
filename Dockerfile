@@ -1,7 +1,7 @@
 # syntax=docker.io/docker/dockerfile:1
 # check=error=true
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 ARG VERSION
 ARG REVISION
@@ -50,7 +50,7 @@ RUN npx license-checker --json --production \
   --customPath licenseCustomFormat.json \
   --out ${PUBLISH_DIR}/ClientApp/build/license.json
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 ARG VERSION
 ARG REVISION
 ENV HOME=/app

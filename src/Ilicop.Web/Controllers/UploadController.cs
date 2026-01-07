@@ -1,4 +1,5 @@
-﻿using Geowerkstatt.Ilicop.Web.Contracts;
+﻿using Asp.Versioning;
+using Geowerkstatt.Ilicop.Web.Contracts;
 using Geowerkstatt.Ilicop.Web.Services;
 using Geowerkstatt.Interlis.RepositoryCrawler;
 using Microsoft.AspNetCore.Http;

@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/Ilicop.Web/bin/Debug/net8.0/Ilicop.Web.dll",
+      "program": "${workspaceFolder}/src/Ilicop.Web/bin/Debug/net10.0/Ilicop.Web.dll",
       "args": [],
       "cwd": "${workspaceFolder}/src/Ilicop.Web",
       "stopAtEntry": false,
