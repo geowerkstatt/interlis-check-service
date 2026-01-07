@@ -86,8 +86,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, "DEFAULT") as CreatedResult;
 
-            Assert.IsInstanceOfType(response, typeof(CreatedResult));
-            Assert.IsInstanceOfType(response.Value, typeof(UploadResponse));
+            Assert.IsInstanceOfType<CreatedResult>(response);
+            Assert.IsInstanceOfType<UploadResponse>(response.Value);
             Assert.AreEqual(StatusCodes.Status201Created, response.StatusCode);
             Assert.AreEqual($"/api/v9/status/{jobId}", response.Location);
             Assert.AreEqual(jobId, ((UploadResponse)response.Value).JobId.ToString());
@@ -111,8 +111,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, profile) as CreatedResult;
 
-            Assert.IsInstanceOfType(response, typeof(CreatedResult));
-            Assert.IsInstanceOfType(response.Value, typeof(UploadResponse));
+            Assert.IsInstanceOfType<CreatedResult>(response);
+            Assert.IsInstanceOfType<UploadResponse>(response.Value);
             Assert.AreEqual(StatusCodes.Status201Created, response.StatusCode);
         }
 
@@ -131,8 +131,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, profile) as ObjectResult;
             var problemDetails = response?.Value as ProblemDetails;
 
-            Assert.IsInstanceOfType(response, typeof(ObjectResult));
-            Assert.IsInstanceOfType(problemDetails, typeof(ProblemDetails));
+            Assert.IsInstanceOfType<ObjectResult>(response);
+            Assert.IsInstanceOfType<ProblemDetails>(problemDetails);
             Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);
             Assert.AreEqual("There is no default profile. A valid profile must be explicitly specified.", problemDetails.Detail);
         }
@@ -149,8 +149,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, "capitalized-profile-id") as ObjectResult;
             var problemDetails = response?.Value as ProblemDetails;
 
-            Assert.IsInstanceOfType(response, typeof(ObjectResult));
-            Assert.IsInstanceOfType(problemDetails, typeof(ProblemDetails));
+            Assert.IsInstanceOfType<ObjectResult>(response);
+            Assert.IsInstanceOfType<ProblemDetails>(problemDetails);
             Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);
             Assert.AreEqual("The specified profile <capitalized-profile-id> does not exist.", problemDetails.Detail);
         }
@@ -172,8 +172,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, "non-existent-profile") as ObjectResult;
             var problemDetails = response?.Value as ProblemDetails;
 
-            Assert.IsInstanceOfType(response, typeof(ObjectResult));
-            Assert.IsInstanceOfType(problemDetails, typeof(ProblemDetails));
+            Assert.IsInstanceOfType<ObjectResult>(response);
+            Assert.IsInstanceOfType<ProblemDetails>(problemDetails);
             Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);
             Assert.AreEqual("The specified profile <non-existent-profile> does not exist.", problemDetails.Detail);
         }
@@ -190,8 +190,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, null) as ObjectResult;
             var problemDetails = response?.Value as ProblemDetails;
 
-            Assert.IsInstanceOfType(response, typeof(ObjectResult));
-            Assert.IsInstanceOfType(problemDetails, typeof(ProblemDetails));
+            Assert.IsInstanceOfType<ObjectResult>(response);
+            Assert.IsInstanceOfType<ProblemDetails>(problemDetails);
             Assert.AreEqual(StatusCodes.Status500InternalServerError, response.StatusCode);
             Assert.AreEqual("Error retrieving profiles.", problemDetails.Detail);
         }
@@ -201,7 +201,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
         {
             var response = await controller.UploadAsync(apiVersionMock.Object, null, null) as ObjectResult;
 
-            Assert.IsInstanceOfType(response, typeof(ObjectResult));
+            Assert.IsInstanceOfType<ObjectResult>(response);
             Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);
             Assert.AreEqual("Form data <file> cannot be empty.", ((ProblemDetails)response.Value).Detail);
         }
@@ -217,7 +217,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             var response = await controller.UploadAsync(apiVersionMock.Object, formFileMock.Object, null) as ObjectResult;
 
-            Assert.IsInstanceOfType(response, typeof(ObjectResult));
+            Assert.IsInstanceOfType<ObjectResult>(response);
             Assert.AreEqual(StatusCodes.Status400BadRequest, response.StatusCode);
             Assert.AreEqual("Transfer file extension <.cmd> is an unknown file extension.", ((ProblemDetails)response.Value).Detail);
         }
