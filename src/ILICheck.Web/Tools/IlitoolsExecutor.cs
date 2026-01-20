@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -106,12 +108,12 @@ namespace ILICheck.Web.Tools
         /// <summary>
         /// Creates the command for executing ilivalidator.
         /// </summary>
-        internal string CreateIlivalidatorCommand(ValidationRequest request)
+        internal List<string> CreateIlivalidatorCommand(ValidationRequest request)
         {
             var args = new List<string>
             {
                 "-jar",
-                $"\"{ilitoolsEnvironment.IlivalidatorPath}\"",
+                ilitoolsEnvironment.IlivalidatorPath,
                 "--allObjectsAccessible",
             };
 
@@ -121,61 +123,67 @@ namespace ILICheck.Web.Tools
                 var jarFiles = Directory.GetFiles(ilitoolsEnvironment.PluginsDir, "*.jar", SearchOption.TopDirectoryOnly);
                 if (jarFiles.Length > 0)
                 {
-                    args.Add($"--plugins \"{ilitoolsEnvironment.PluginsDir}\"");
+                    args.Add("--plugins");
+                    args.Add(ilitoolsEnvironment.PluginsDir);
                     logger.LogDebug("Added plugins directory with {PluginCount} JAR files", jarFiles.Length);
                 }
             }
 
             if (!string.IsNullOrEmpty(ilitoolsEnvironment.IlivalidatorConfigPath))
             {
-                args.Add($"--config \"{ilitoolsEnvironment.IlivalidatorConfigPath}\"");
+                args.Add("--config");
+                args.Add(ilitoolsEnvironment.IlivalidatorConfigPath);
             }
 
             args.AddRange(GetCommonIlitoolsArguments(request));
 
             // Add transfer file path (without specific parameter name)
-            args.Add($"\"{request.TransferFilePath}\"");
+            args.Add(request.TransferFilePath);
 
             // Add additional catalogue files if present
             foreach (var cataloguePath in request.AdditionalCatalogueFilePaths)
             {
-                args.Add($"\"{cataloguePath}\"");
+                args.Add(cataloguePath);
             }
 
-            return args.JoinNonEmpty(" ");
+            return args;
         }
 
         /// <summary>
         /// Creates the command for executing ili2gpkg.
         /// </summary>
-        internal string CreateIli2GpkgCommand(ValidationRequest request)
+        internal List<string> CreateIli2GpkgCommand(ValidationRequest request)
         {
             var args = new List<string>
             {
                 "-jar",
-                $"\"{ilitoolsEnvironment.Ili2GpkgPath}\"",
+                ilitoolsEnvironment.Ili2GpkgPath,
                 "--validate",
             };
 
             // Add model names for GPKG files if specified
             if (!string.IsNullOrEmpty(request.GpkgModelNames))
             {
-                args.Add($"--models \"{request.GpkgModelNames}\"");
+                args.Add("--models");
+                args.Add(request.GpkgModelNames);
             }
 
             args.AddRange(GetCommonIlitoolsArguments(request));
 
             // Add database file parameter
-            args.Add($"--dbfile \"{request.TransferFilePath}\"");
+            args.Add("--dbfile");
+            args.Add(request.TransferFilePath);
 
-            return args.JoinNonEmpty(" ");
+            return args;
         }
 
         internal IEnumerable<string> GetCommonIlitoolsArguments(ValidationRequest request)
         {
             // Add common logging options
-            yield return $"--log \"{request.LogFilePath}\"";
-            yield return $"--xtflog \"{request.XtfLogFilePath}\"";
+            yield return "--log";
+            yield return request.LogFilePath;
+            yield return "--xtflog";
+            yield return request.XtfLogFilePath;
             yield return "--verbose";
 
             // Add proxy settings
@@ -194,12 +202,14 @@ namespace ILICheck.Web.Tools
 
                 if (!string.IsNullOrEmpty(uri?.Host))
                 {
-                    yield return $"--proxy {uri.Host}";
+                    yield return "--proxy";
+                    yield return uri.Host;
                 }
 
                 if (uri?.Port != -1)
                 {
-                    yield return $"--proxyPort {uri.Port}";
+                    yield return "--proxyPort";
+                    yield return uri.Port.ToString(CultureInfo.InvariantCulture);
                 }
             }
 
@@ -212,7 +222,8 @@ namespace ILICheck.Web.Tools
             // Add model directory
             if (!string.IsNullOrEmpty(ilitoolsEnvironment.ModelRepositoryDir))
             {
-                yield return $"--modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\"";
+                yield return "--modeldir";
+                yield return ilitoolsEnvironment.ModelRepositoryDir;
             }
         }
 
@@ -222,16 +233,14 @@ namespace ILICheck.Web.Tools
         /// <param name="command">The command to execute.</param>
         /// <param name="cancellationToken">An optional <see cref="CancellationToken"/> to cancel the asynchronous operation.</param>
         /// <returns>The exit code that the associated process specified when it terminated.</returns>
-        private async Task<int> ExecuteJavaCommandAsync(string command, CancellationToken cancellationToken)
+        private async Task<int> ExecuteJavaCommandAsync(List<string> command, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Executing command: java {Command}", command);
+            logger.LogInformation("Executing command: java {Command}", PrettyPrintCommand(command));
 
             using var process = new Process
             {
-                StartInfo = new ProcessStartInfo
+                StartInfo = new ProcessStartInfo("java", command)
                 {
-                    FileName = "java",
-                    Arguments = command,
                     RedirectStandardError = true,
                 },
                 EnableRaisingEvents = true,
@@ -251,6 +260,18 @@ namespace ILICheck.Web.Tools
                 process.Kill(entireProcessTree: true);
                 return -1;
             }
+        }
+
+        /// <summary>
+        /// Pretty-prints the given command arguments for logging purposes.
+        /// Caution: this is not intended to be safe to use as process arguments.
+        /// </summary>
+        internal static string PrettyPrintCommand(IEnumerable<string> command)
+        {
+            // No quotes around commandline options
+            return command
+                .Select(arg => arg.StartsWith('-') ? arg : $"\"{arg}\"")
+                .JoinNonEmpty(" ");
         }
     }
 }

@@ -41,7 +41,7 @@ namespace ILICheck.Web.Tools
         public void GetCommonIlitoolsArguments()
         {
             var request = CreateValidationRequest("/test/path", "test.xtf");
-            var args = string.Join(" ", ilitoolsExecutor.GetCommonIlitoolsArguments(request));
+            var args = IlitoolsExecutor.PrettyPrintCommand(ilitoolsExecutor.GetCommonIlitoolsArguments(request));
 
             Assert.AreEqual($"--log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\"", args);
         }
@@ -50,7 +50,7 @@ namespace ILICheck.Web.Tools
         public void CreateIlivalidatorCommand()
         {
             var request = CreateValidationRequest("/test/path", "test.xtf");
-            var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
+            var command = IlitoolsExecutor.PrettyPrintCommand(ilitoolsExecutor.CreateIlivalidatorCommand(request));
 
             var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --allObjectsAccessible --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
@@ -60,7 +60,7 @@ namespace ILICheck.Web.Tools
         public void CreateIlivalidatorCommandWithCatalogueFiles()
         {
             var request = CreateValidationRequest("/test/path", "test.xtf", additionalCatalogueFilePaths: new List<string> { "additionalTestFile.xml" });
-            var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
+            var command = IlitoolsExecutor.PrettyPrintCommand(ilitoolsExecutor.CreateIlivalidatorCommand(request));
 
             var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --allObjectsAccessible --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\" \"additionalTestFile.xml\"";
             Assert.AreEqual(expected, command);
@@ -71,7 +71,7 @@ namespace ILICheck.Web.Tools
         {
             ilitoolsEnvironment.IlivalidatorConfigPath = "/test/config.toml";
             var request = CreateValidationRequest("/test/path", "test.xtf");
-            var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
+            var command = IlitoolsExecutor.PrettyPrintCommand(ilitoolsExecutor.CreateIlivalidatorCommand(request));
 
             var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --allObjectsAccessible --config \"{ilitoolsEnvironment.IlivalidatorConfigPath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
@@ -81,7 +81,7 @@ namespace ILICheck.Web.Tools
         public void CreateIli2GpkgCommandWithModelNames()
         {
             var request = CreateValidationRequest("/test/path", "test.gpkg", "Model1;Model2");
-            var command = ilitoolsExecutor.CreateIli2GpkgCommand(request);
+            var command = IlitoolsExecutor.PrettyPrintCommand(ilitoolsExecutor.CreateIli2GpkgCommand(request));
 
             var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --models \"Model1;Model2\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --dbfile \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
@@ -91,7 +91,7 @@ namespace ILICheck.Web.Tools
         public void CreateIli2GpkgCommandWithoutModelNames()
         {
             var request = CreateValidationRequest("/test/path", "test.gpkg");
-            var command = ilitoolsExecutor.CreateIli2GpkgCommand(request);
+            var command = IlitoolsExecutor.PrettyPrintCommand(ilitoolsExecutor.CreateIli2GpkgCommand(request));
 
             var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --dbfile \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
@@ -102,7 +102,7 @@ namespace ILICheck.Web.Tools
         {
             ilitoolsEnvironment.IlivalidatorConfigPath = "/test/config.toml";
             var request = CreateValidationRequest("/test/path", "test.gpkg");
-            var command = ilitoolsExecutor.CreateIli2GpkgCommand(request);
+            var command = IlitoolsExecutor.PrettyPrintCommand(ilitoolsExecutor.CreateIli2GpkgCommand(request));
 
             var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --dbfile \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
@@ -119,7 +119,7 @@ namespace ILICheck.Web.Tools
         private void AssertIlivalidatorCommandContains(string homeDirectory, string transferFile, string modelNames)
         {
             var request = CreateValidationRequest(homeDirectory, transferFile, modelNames);
-            var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
+            var command = IlitoolsExecutor.PrettyPrintCommand(ilitoolsExecutor.CreateIlivalidatorCommand(request));
 
             StringAssert.Contains(command, $"--log \"{request.LogFilePath}\"");
             StringAssert.Contains(command, $"--xtflog \"{request.XtfLogFilePath}\"");
