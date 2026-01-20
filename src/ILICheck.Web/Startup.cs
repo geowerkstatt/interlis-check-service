@@ -64,6 +64,24 @@ namespace ILICheck.Web
                         .WithOrigins("https://localhost:44302");
                 });
             });
+
+            services.AddSingleton(sp =>
+            {
+                var cfg = sp.GetRequiredService<IConfiguration>();
+                return new IlitoolsEnvironment
+                {
+                    InstallationDir = cfg.GetValue<string>("ILITOOLS_HOME_DIR") ?? "/ilitools",
+                    CacheDir = cfg.GetValue<string>("ILITOOLS_CACHE_DIR") ?? "/cache",
+                    ModelRepositoryDir = cfg.GetValue<string>("ILIVALIDATOR_MODEL_DIR"),
+                    PluginsDir = cfg.GetValue<string>("ILITOOLS_PLUGINS_DIR") ?? "/plugins",
+                    EnableGpkgValidation = cfg.GetValue<bool>("ENABLE_GPKG_VALIDATION"),
+                };
+            });
+
+            services.AddHttpClient();
+            services.AddHostedService<IlitoolsBootstrapService>();
+            services.AddTransient<IlitoolsExecutor>();
+
             services.AddSingleton<IValidatorService, ValidatorService>();
             services.AddHostedService(services => (ValidatorService)services.GetService<IValidatorService>());
             services.AddTransient<IValidator, Validator>();
