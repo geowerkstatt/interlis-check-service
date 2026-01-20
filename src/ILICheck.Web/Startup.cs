@@ -68,12 +68,15 @@ namespace ILICheck.Web
             services.AddSingleton(sp =>
             {
                 var cfg = sp.GetRequiredService<IConfiguration>();
+                var configDir = cfg.GetValue<string>("ILITOOLS_CONFIG_DIR");
+                var configFileName = cfg.GetValue<string>("ILIVALIDATOR_CONFIG_NAME");
                 return new IlitoolsEnvironment
                 {
                     InstallationDir = cfg.GetValue<string>("ILITOOLS_HOME_DIR") ?? "/ilitools",
                     CacheDir = cfg.GetValue<string>("ILITOOLS_CACHE_DIR") ?? "/cache",
                     ModelRepositoryDir = cfg.GetValue<string>("ILIVALIDATOR_MODEL_DIR"),
                     PluginsDir = cfg.GetValue<string>("ILITOOLS_PLUGINS_DIR") ?? "/plugins",
+                    IlivalidatorConfigPath = !string.IsNullOrEmpty(configDir) && !string.IsNullOrEmpty(configFileName) ? Path.Combine(configDir, configFileName) : null,
                     EnableGpkgValidation = cfg.GetValue<bool>("ENABLE_GPKG_VALIDATION"),
                 };
             });

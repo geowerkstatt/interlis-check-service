@@ -52,7 +52,7 @@ namespace ILICheck.Web.Tools
             var request = CreateValidationRequest("/test/path", "test.xtf");
             var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
 
-            var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --csvlog \"{request.CsvLogFilePath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\"";
+            var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --allObjectsAccessible --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
         }
 
@@ -62,7 +62,18 @@ namespace ILICheck.Web.Tools
             var request = CreateValidationRequest("/test/path", "test.xtf", additionalCatalogueFilePaths: new List<string> { "additionalTestFile.xml" });
             var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
 
-            var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --csvlog \"{request.CsvLogFilePath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\" \"additionalTestFile.xml\"";
+            var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --allObjectsAccessible --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\" \"additionalTestFile.xml\"";
+            Assert.AreEqual(expected, command);
+        }
+
+        [TestMethod]
+        public void CreateIlivalidatorCommandWithConfig()
+        {
+            ilitoolsEnvironment.IlivalidatorConfigPath = "/test/config.toml";
+            var request = CreateValidationRequest("/test/path", "test.xtf");
+            var command = ilitoolsExecutor.CreateIlivalidatorCommand(request);
+
+            var expected = $"-jar \"{ilitoolsEnvironment.IlivalidatorPath}\" --allObjectsAccessible --config \"{ilitoolsEnvironment.IlivalidatorConfigPath}\" --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" \"{request.TransferFilePath}\"";
             Assert.AreEqual(expected, command);
         }
 
@@ -79,6 +90,17 @@ namespace ILICheck.Web.Tools
         [TestMethod]
         public void CreateIli2GpkgCommandWithoutModelNames()
         {
+            var request = CreateValidationRequest("/test/path", "test.gpkg");
+            var command = ilitoolsExecutor.CreateIli2GpkgCommand(request);
+
+            var expected = $"-jar \"{ilitoolsEnvironment.Ili2GpkgPath}\" --validate --log \"{request.LogFilePath}\" --xtflog \"{request.XtfLogFilePath}\" --verbose --modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\" --dbfile \"{request.TransferFilePath}\"";
+            Assert.AreEqual(expected, command);
+        }
+
+        [TestMethod]
+        public void CreateIli2GpkgCommandIgnoresConfig()
+        {
+            ilitoolsEnvironment.IlivalidatorConfigPath = "/test/config.toml";
             var request = CreateValidationRequest("/test/path", "test.gpkg");
             var command = ilitoolsExecutor.CreateIli2GpkgCommand(request);
 
@@ -112,7 +134,6 @@ namespace ILICheck.Web.Tools
             var transferFileNameWithoutExtension = Path.GetFileNameWithoutExtension(transferFile);
             var logPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.log");
             var xtfLogPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.xtf");
-            var csvLogPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.csv");
             var transferFilePath = Path.Combine(homeDirectory, transferFile);
 
             return new ValidationRequest
@@ -121,7 +142,6 @@ namespace ILICheck.Web.Tools
                 TransferFilePath = transferFilePath,
                 LogFilePath = logPath,
                 XtfLogFilePath = xtfLogPath,
-                CsvLogFilePath = csvLogPath,
                 GpkgModelNames = modelNames,
                 AdditionalCatalogueFilePaths = additionalCatalogueFilePaths ?? new List<string>(),
             };

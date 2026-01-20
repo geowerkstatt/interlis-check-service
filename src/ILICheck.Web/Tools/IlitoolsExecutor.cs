@@ -112,6 +112,7 @@ namespace ILICheck.Web.Tools
             {
                 "-jar",
                 $"\"{ilitoolsEnvironment.IlivalidatorPath}\"",
+                "--allObjectsAccessible",
             };
 
             // Add plugins
@@ -125,8 +126,10 @@ namespace ILICheck.Web.Tools
                 }
             }
 
-            // Add csv log if enabled
-            args.Add($"--csvlog \"{request.CsvLogFilePath}\"");
+            if (!string.IsNullOrEmpty(ilitoolsEnvironment.IlivalidatorConfigPath))
+            {
+                args.Add($"--config \"{ilitoolsEnvironment.IlivalidatorConfigPath}\"");
+            }
 
             args.AddRange(GetCommonIlitoolsArguments(request));
 
@@ -207,7 +210,10 @@ namespace ILICheck.Web.Tools
             }
 
             // Add model directory
-            yield return $"--modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\"";
+            if (!string.IsNullOrEmpty(ilitoolsEnvironment.ModelRepositoryDir))
+            {
+                yield return $"--modeldir \"{ilitoolsEnvironment.ModelRepositoryDir}\"";
+            }
         }
 
         /// <summary>

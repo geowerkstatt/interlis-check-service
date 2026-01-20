@@ -42,6 +42,11 @@
         public string IlivalidatorPath { get; set; }
 
         /// <summary>
+        /// Gets or sets the path to the optional ilivalidator TOML configuration file.
+        /// </summary>
+        public string IlivalidatorConfigPath { get; set; }
+
+        /// <summary>
         /// Gets or sets the ili2gpkg version.
         /// </summary>
         public string Ili2GpkgVersion { get; set; }

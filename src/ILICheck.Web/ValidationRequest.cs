@@ -30,11 +30,6 @@ namespace ILICheck.Web
         public required string XtfLogFilePath { get; init; }
 
         /// <summary>
-        /// Gets or sets the path to the CSV log file.
-        /// </summary>
-        public required string CsvLogFilePath { get; init; }
-
-        /// <summary>
         /// Gets or sets the GPKG model names (semicolon-separated) if validating a GeoPackage.
         /// </summary>
         public string GpkgModelNames { get; init; }
