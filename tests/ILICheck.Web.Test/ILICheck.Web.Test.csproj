@@ -36,10 +36,34 @@
     <None Update="testdata\example_log.xtf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="testdata\ilitools\ili2gpkg\1.20.29\placeholder">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="testdata\ilitools\ili2gpkg\5.5.5\placeholder">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="testdata\ilitools\ili2gpkg\7.6.1\placeholder">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="testdata\ilitools\ili2gpkg\7.7.7\placeholder">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="testdata\ilitools\ilivalidator\5.10.9\placeholder">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="testdata\ilitools\ilivalidator\5.2.9\placeholder">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="testdata\ilitools\KIMBOHUNT\GILGAMESHGIRAFFE\placeholder">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="testdata\invalid.gpkg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="testdata\invalid.xtf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="testdata\mock.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="testdata\xtflog\invalid.xtf">
