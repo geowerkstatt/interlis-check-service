@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using ILICheck.Web.Tools;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -44,7 +45,7 @@ namespace ILICheck.Web
         {
             services.AddControllersWithViews();
             services.AddHttpContextAccessor();
-            services.AddHealthChecks().AddCheck<IlivalidatorHealthCheck>("Ilivalidator");
+            services.AddHealthChecks().AddCheck<IlitoolsHealthCheck>("Ilivalidator");
             services.AddApiVersioning(config =>
             {
                 config.AssumeDefaultVersionWhenUnspecified = true;
