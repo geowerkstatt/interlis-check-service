@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ILICheck.Web.Tools;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,16 +21,27 @@ namespace ILICheck.Web
         private Mock<ILogger<Validator>> loggerMock;
         private Mock<PhysicalFileProvider> fileProviderMock;
         private Mock<Validator> validatorMock;
+        private Mock<IlitoolsExecutor> ilitoolsExecutorMock;
 
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void Initialize()
         {
+            var configuration = CreateConfiguration();
+            var ilitoolsEnvironment = new IlitoolsEnvironment
+            {
+                InstallationDir = Path.Combine(TestContext.DeploymentDirectory, "FALLOUT"),
+                CacheDir = Path.Combine(TestContext.DeploymentDirectory, "ARKSHARK"),
+                EnableGpkgValidation = false,
+            };
+
             jsonOptions = new JsonOptions();
             loggerMock = new Mock<ILogger<Validator>>();
-            fileProviderMock = new Mock<PhysicalFileProvider>(MockBehavior.Strict, CreateConfiguration(), "ILICHECK_UPLOADS_DIR");
-            validatorMock = new Mock<Validator>(MockBehavior.Strict, loggerMock.Object, CreateConfiguration(), fileProviderMock.Object, Options.Create(jsonOptions));
+            fileProviderMock = new Mock<PhysicalFileProvider>(MockBehavior.Strict, configuration, "ILICHECK_UPLOADS_DIR");
+            ilitoolsExecutorMock = new Mock<IlitoolsExecutor>(MockBehavior.Strict, new Mock<ILogger<IlitoolsExecutor>>().Object, ilitoolsEnvironment, configuration);
+
+            validatorMock = new Mock<Validator>(MockBehavior.Strict, loggerMock.Object, configuration, fileProviderMock.Object, Options.Create(jsonOptions), ilitoolsExecutorMock.Object);
 
             validatorMock.SetupGet(x => x.Id).Returns(new Guid(jobId));
         }

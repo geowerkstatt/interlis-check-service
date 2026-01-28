@@ -16,60 +16,6 @@ export ENABLE_GPKG_VALIDATION=${ENABLE_GPKG_VALIDATION:-false}
 # Override ilitools default cache directory
 export ILI_CACHE=$ILITOOLS_CACHE_DIR
 
-# Download and configure ilivalidator and optional ili2pgkg
-download_and_configure_ilitool () {
-  ilitool=$1
-  version=$2
-  installDir=$ILITOOLS_HOME_DIR/$ilitool/$version
-
-  # Exit if the tool is already installed
-  if [[ -d $installDir ]]; then
-      echo "$ilitool-$version is already installed. Skipping download and configuration."
-      return
-  fi
-
-  echo -n "Download and configure $ilitool-$version ..."
-  curl https://downloads.interlis.ch/$ilitool/$ilitool-$version.zip -LO --silent --show-error && \
-    mkdir -p $installDir && unzip -o -q $ilitool-$version.zip -d $installDir && \
-    rm $ilitool-$version.zip && \
-    echo "done!" || echo "could not install $ilitool-$version!"
-}
-
-# Get latest installed version from install directory
-get_latest_installed_ilitool_version () {
-  ilitool=$1
-  version=$(ls $ILITOOLS_HOME_DIR/$ilitool | sort -V | tail -n 1)
-  echo ${version:-"undefined"}
-}
-
-if [[ -n $ILIVALIDATOR_VERSION ]]; then
-  download_and_configure_ilitool ilivalidator $ILIVALIDATOR_VERSION
-  export ILIVALIDATOR_VERSION=$ILIVALIDATOR_VERSION
-else
-  ILIVALIDATOR_LATEST_VERSION=$(curl https://www.interlis.ch/downloads/ilivalidator --silent | grep -Po '(?<=ilivalidator-)\d+.\d+.\d+' | head -n 1)
-  if [[ -z $ILIVALIDATOR_LATEST_VERSION ]]; then
-    echo "Failed to fetch the latest ilivalidator version. Falling back to the latest installed version."
-    ILIVALIDATOR_LATEST_VERSION=$(get_latest_installed_ilitool_version ilivalidator)
-  fi
-  download_and_configure_ilitool ilivalidator $ILIVALIDATOR_LATEST_VERSION
-  export ILIVALIDATOR_VERSION=$ILIVALIDATOR_LATEST_VERSION
-fi
-
-if [[ $ENABLE_GPKG_VALIDATION = true ]]; then
-  if [[ -n $ILI2GPKG_VERSION ]]; then
-    download_and_configure_ilitool ili2gpkg $ILI2GPKG_VERSION
-    export ILI2GPKG_VERSION=$ILI2GPKG_VERSION
-  else
-    ILI2GPKG_LATEST_VERSION=$(curl https://www.interlis.ch/downloads/ili2db --silent | grep -Po '(?<=ili2gpkg-)\d+.\d+.\d+' | head -n 1)
-    if [[ -z $ILI2GPKG_LATEST_VERSION && -z $ILI2GPKG_VERSION ]]; then
-        echo "Failed to fetch the latest ili2gpkg version. Falling back to the latest installed version."
-        ILI2GPKG_LATEST_VERSION=$(get_latest_installed_ilitool_version ili2gpkg)
-    fi
-    download_and_configure_ilitool ili2gpkg $ILI2GPKG_LATEST_VERSION
-    export ILI2GPKG_VERSION=$ILI2GPKG_LATEST_VERSION
-  fi
-fi
-
 # Copy custom web assets to the web app public folder
 [[ "$(ls -A $ILICHECK_WEB_ASSETS_DIR)" ]] && \
   echo -n "Copy custom web assets ..." && \

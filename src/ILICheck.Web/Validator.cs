@@ -1,4 +1,5 @@
-﻿using ILICheck.Web.XtfLog;
+﻿using ILICheck.Web.Tools;
+using ILICheck.Web.XtfLog;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +27,7 @@ namespace ILICheck.Web
         private readonly ILogger<Validator> logger;
         private readonly IConfiguration configuration;
         private readonly IFileProvider fileProvider;
+        private readonly IlitoolsExecutor ilitoolsExecutor;
         private readonly JsonOptions jsonOptions;
 
         /// <inheritdoc/>
@@ -43,11 +45,12 @@ namespace ILICheck.Web
         /// <summary>
         /// Initializes a new instance of the <see cref="Validator"/> class.
         /// </summary>
-        public Validator(ILogger<Validator> logger, IConfiguration configuration, IFileProvider fileProvider, IOptions<JsonOptions> jsonOptions)
+        public Validator(ILogger<Validator> logger, IConfiguration configuration, IFileProvider fileProvider, IOptions<JsonOptions> jsonOptions, IlitoolsExecutor ilitoolsExecutor)
         {
             this.logger = logger;
             this.configuration = configuration;
             this.fileProvider = fileProvider;
+            this.ilitoolsExecutor = ilitoolsExecutor;
             this.jsonOptions = jsonOptions.Value;
 
             this.fileProvider.Initialize(Id);
@@ -198,13 +201,27 @@ namespace ILICheck.Web
         {
             logger.LogInformation("Validating transfer file <{TransferFile}> with ilivalidator/ili2gpkg", TransferFile);
 
-            var command = GetIlivalidatorCommand(
-                configuration,
-                fileProvider.HomeDirectoryPathFormat,
-                TransferFile,
-                GpkgModelNames);
+            var homeDirectory = fileProvider.HomeDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var transferFileNameWithoutExtension = Path.GetFileNameWithoutExtension(TransferFile);
+            var logPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.log");
+            var xtfLogPath = Path.Combine(homeDirectory, $"{transferFileNameWithoutExtension}_log.xtf");
+            var transferFilePath = Path.Combine(homeDirectory, TransferFile);
+            var xmlCatalogFiles = fileProvider.GetFiles()
+                .Where(file => Path.GetExtension(file).Equals(".xml", StringComparison.OrdinalIgnoreCase) && !file.Equals(TransferFile, StringComparison.OrdinalIgnoreCase))
+                .Select(file => Path.Combine(homeDirectory, file))
+                .ToList();
 
-            var exitCode = await ExecuteCommandAsync(configuration, command, cancellationToken).ConfigureAwait(false);
+            var request = new ValidationRequest
+            {
+                TransferFileName = TransferFile,
+                TransferFilePath = transferFilePath,
+                LogFilePath = logPath,
+                XtfLogFilePath = xtfLogPath,
+                GpkgModelNames = GpkgModelNames,
+                AdditionalCatalogueFilePaths = xmlCatalogFiles,
+            };
+
+            var exitCode = await ilitoolsExecutor.ValidateAsync(request, cancellationToken).ConfigureAwait(false);
 
             await GenerateGeoJsonAsync().ConfigureAwait(false);
             if (exitCode != 0)
