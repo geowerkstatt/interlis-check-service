@@ -1,4 +1,5 @@
-﻿using Geowerkstatt.Ilicop.Web.Contracts;
+﻿using Asp.Versioning;
+using Geowerkstatt.Ilicop.Web.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

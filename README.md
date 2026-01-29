@@ -373,7 +373,7 @@ docker inspect --format='{{json .State.Health.Status}}' container_name
 Folgenden Komponenten müssen auf dem Entwicklungsrechner installiert sein:
 
 - Git
-- Visual Studio 2022 oder Visual Studio Code
+- Visual Studio 2026 oder Visual Studio Code
 - Node.js 20 LTS
 
 1. Git Repository klonen:  

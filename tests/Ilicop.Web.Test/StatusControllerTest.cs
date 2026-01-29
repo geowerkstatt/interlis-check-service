@@ -1,4 +1,5 @@
-﻿using Geowerkstatt.Ilicop.Web.Contracts;
+﻿using Asp.Versioning;
+using Geowerkstatt.Ilicop.Web.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -26,7 +27,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
             loggerMock = new Mock<ILogger<StatusController>>();
             validatorServiceMock = new Mock<IValidatorService>(MockBehavior.Strict);
             fileProviderMock = new Mock<IFileProvider>(MockBehavior.Strict);
-            apiVersionMock = new Mock<ApiVersion>(MockBehavior.Strict, 8, 77);
+            apiVersionMock = new Mock<ApiVersion>(MockBehavior.Strict, 8, 77, null);
 
             controller = new StatusController(
                 loggerMock.Object,
@@ -59,13 +60,13 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             var response = controller.GetStatus(apiVersionMock.Object, jobId) as OkObjectResult;
 
-            Assert.IsInstanceOfType(response, typeof(OkObjectResult));
-            Assert.IsInstanceOfType(response.Value, typeof(StatusResponse));
+            Assert.IsInstanceOfType<OkObjectResult>(response);
+            Assert.IsInstanceOfType<StatusResponse>(response.Value);
             Assert.AreEqual(StatusCodes.Status200OK, response.StatusCode);
             Assert.AreEqual(jobId, ((StatusResponse)response.Value).JobId);
             Assert.AreEqual(Status.Processing, ((StatusResponse)response.Value).Status);
             Assert.AreEqual("WAFFLESPATULA GREENNIGHT", ((StatusResponse)response.Value).StatusMessage);
-            Assert.AreEqual(null, ((StatusResponse)response.Value).LogUrl);
+            Assert.IsNull(((StatusResponse)response.Value).LogUrl);
             Assert.AreEqual($"/api/v8/download?jobId={jobId}&logType=xtf", ((StatusResponse)response.Value).XtfLogUrl.ToString());
             Assert.AreEqual($"/api/v8/download/json?jobId={jobId}", ((StatusResponse)response.Value).JsonLogUrl.ToString());
             Assert.IsNull(((StatusResponse)response.Value).GeoJsonLogUrl);
@@ -86,8 +87,8 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             var response = controller.GetStatus(apiVersionMock.Object, jobId) as OkObjectResult;
 
-            Assert.IsInstanceOfType(response, typeof(OkObjectResult));
-            Assert.IsInstanceOfType(response.Value, typeof(StatusResponse));
+            Assert.IsInstanceOfType<OkObjectResult>(response);
+            Assert.IsInstanceOfType<StatusResponse>(response.Value);
             Assert.AreEqual(StatusCodes.Status200OK, response.StatusCode);
             Assert.AreEqual($"/api/v8/download?jobId={jobId}&logType=geojson", ((StatusResponse)response.Value).GeoJsonLogUrl.ToString());
         }
@@ -104,7 +105,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
 
             var response = controller.GetStatus(apiVersionMock.Object, default) as ObjectResult;
 
-            Assert.IsInstanceOfType(response, typeof(ObjectResult));
+            Assert.IsInstanceOfType<ObjectResult>(response);
             Assert.AreEqual(StatusCodes.Status404NotFound, response.StatusCode);
             Assert.AreEqual($"No job information available for job id <{jobId}>", ((ProblemDetails)response.Value).Detail);
         }

@@ -45,15 +45,15 @@ public sealed class ProfileServiceTest
 
         var actualProfiles = await service.GetProfiles();
 
-        Assert.AreEqual(expectedProfiles.Count, actualProfiles.Count);
+        Assert.HasCount(expectedProfiles.Count, actualProfiles);
 
         Assert.AreEqual(expectedProfiles[0].Id, actualProfiles[0].Id);
-        Assert.AreEqual(expectedProfiles[0].Titles.Count, actualProfiles[0].Titles.Count);
+        Assert.HasCount(expectedProfiles[0].Titles.Count, actualProfiles[0].Titles);
         Assert.AreEqual(expectedProfiles[0].Titles[0].Language, actualProfiles[0].Titles[0].Language);
         Assert.AreEqual(expectedProfiles[0].Titles[0].Text, actualProfiles[0].Titles[0].Text);
 
         Assert.AreEqual(expectedProfiles[1].Id, actualProfiles[1].Id);
-        Assert.AreEqual(expectedProfiles[1].Titles.Count, actualProfiles[1].Titles.Count);
+        Assert.HasCount(expectedProfiles[1].Titles.Count, actualProfiles[1].Titles);
         Assert.AreEqual(expectedProfiles[1].Titles[0].Language, actualProfiles[1].Titles[0].Language);
         Assert.AreEqual(expectedProfiles[1].Titles[0].Text, actualProfiles[1].Titles[0].Text);
         Assert.AreEqual(expectedProfiles[1].Titles[1].Language, actualProfiles[1].Titles[1].Language);
@@ -78,7 +78,7 @@ public sealed class ProfileServiceTest
 
         var actualProfiles = await service.GetProfiles();
 
-        Assert.AreEqual(2, actualProfiles.Count);
+        Assert.HasCount(2, actualProfiles);
         Assert.AreEqual(profile1.Id, actualProfiles[0].Id);
         Assert.AreEqual(profile2.Id, actualProfiles[1].Id);
     }
@@ -99,7 +99,7 @@ public sealed class ProfileServiceTest
         var profiles = await service.GetProfiles();
 
         Assert.IsNotNull(profiles);
-        Assert.AreEqual(0, profiles.Count);
+        Assert.IsEmpty(profiles);
     }
 
     [TestMethod]
@@ -116,6 +116,6 @@ public sealed class ProfileServiceTest
         var profiles = await service.GetProfiles();
 
         Assert.IsNotNull(profiles);
-        Assert.AreEqual(0, profiles.Count);
+        Assert.IsEmpty(profiles);
     }
 }

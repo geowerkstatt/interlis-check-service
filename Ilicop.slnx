@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="CHANGELOG.md" />
+    <File Path="CONTRIBUTING.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="docker-compose.yml" />
+    <File Path="docker-entrypoint.sh" />
+    <File Path="Dockerfile" />
+    <File Path="README.md" />
+    <File Path="VERSION" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Ilicop.Web/Ilicop.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Ilicop.Web.Test/Ilicop.Web.Test.csproj" />
+  </Folder>
+</Solution>
