@@ -118,6 +118,13 @@ namespace Geowerkstatt.Ilicop.Web
         }
 
         [TestMethod]
+        [DeploymentItem(@"testdata/invalid_model_name.gpkg", "2b005f1a-4eac-4d05-8ac6-c9221250f5a0")]
+        public async Task ReadGpkgModelNamesAsyncForInvalidModelNames()
+        {
+            await Assert.ThrowsExactlyAsync<GeoPackageException>(async () => await validatorMock.Object.ReadGpkgModelNamesAsync("invalid_model_name.gpkg").ConfigureAwait(false));
+        }
+
+        [TestMethod]
         public async Task CleanUploadDirectoryAsync()
         {
             var transferFile = "example.xtf";
