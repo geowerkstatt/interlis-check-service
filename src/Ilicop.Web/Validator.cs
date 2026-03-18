@@ -13,6 +13,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -174,10 +175,11 @@ namespace Geowerkstatt.Ilicop.Web
 
             logger.LogInformation("Reading model names from GeoPackage <{TransferFile}>", transferFile);
 
+            string gpkgModelNames;
             try
             {
                 var connectionString = $"Data Source={Path.Combine(fileProvider.HomeDirectory.FullName, transferFile)}";
-                return await Task.Run(() =>
+                gpkgModelNames = await Task.Run(() =>
                     ReadGpkgModelNameEntries(connectionString)
                     .CleanupGpkgModelNames(configuration)
                     .JoinNonEmpty(";"))
@@ -188,6 +190,14 @@ namespace Geowerkstatt.Ilicop.Web
                 throw new GeoPackageException(
                     string.Format(CultureInfo.InvariantCulture, "Cannot read model names from the given GeoPackage SQLite database. <{0}>", ex.Message), ex);
             }
+
+            Regex validModelNameRegex = new Regex(@"^[a-zA-Z0-9_]+$");
+            if (!validModelNameRegex.IsMatch(gpkgModelNames))
+            {
+                throw new GeoPackageException("The extracted model names from the GeoPackage contain invalid characters.");
+            }
+
+            return gpkgModelNames;
         }
 
         /// <summary>
