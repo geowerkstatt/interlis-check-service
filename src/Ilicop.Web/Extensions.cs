@@ -16,6 +16,7 @@ namespace Geowerkstatt.Ilicop.Web
     public static class Extensions
     {
         private static readonly Regex removeReferencedModelsRegex = new("{[^}]*}", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        private static readonly Regex validInterlisModelNameRegex = new("^[a-zA-Z0-9_]+$");
 
         /// <summary>
         /// Concatenates the members of a constructed string collection using the specified separator between each member.
@@ -56,6 +57,22 @@ namespace Geowerkstatt.Ilicop.Web
             }
 
             return result.Distinct();
+        }
+
+        /// <summary>
+        /// Validates that the model names only contain valid characters.
+        /// </summary>
+        /// <param name="gpkgModelNames">List of INTERLIS model names.</param>
+        /// <returns>The same list of INTERLIS model names if all model names are valid.</returns>
+        /// <exception cref="GeoPackageException">If any of the model names contain invalid characters.</exception>
+        public static IEnumerable<string> ValidateGpkgModelNames(this IEnumerable<string> gpkgModelNames)
+        {
+            if (gpkgModelNames.Any(modelName => !validInterlisModelNameRegex.IsMatch(modelName)))
+            {
+                throw new GeoPackageException("The extracted model names from the GeoPackage contain invalid characters.");
+            }
+
+            return gpkgModelNames;
         }
 
         /// <summary>

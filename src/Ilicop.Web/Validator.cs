@@ -13,6 +13,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -174,20 +175,22 @@ namespace Geowerkstatt.Ilicop.Web
 
             logger.LogInformation("Reading model names from GeoPackage <{TransferFile}>", transferFile);
 
+            IEnumerable<string> gpkgModelNames;
             try
             {
                 var connectionString = $"Data Source={Path.Combine(fileProvider.HomeDirectory.FullName, transferFile)}";
-                return await Task.Run(() =>
-                    ReadGpkgModelNameEntries(connectionString)
-                    .CleanupGpkgModelNames(configuration)
-                    .JoinNonEmpty(";"))
-                    .ConfigureAwait(false);
+                gpkgModelNames = await Task.Run(() => ReadGpkgModelNameEntries(connectionString).ToList()).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 throw new GeoPackageException(
                     string.Format(CultureInfo.InvariantCulture, "Cannot read model names from the given GeoPackage SQLite database. <{0}>", ex.Message), ex);
             }
+
+            return gpkgModelNames
+                    .CleanupGpkgModelNames(configuration)
+                    .ValidateGpkgModelNames()
+                    .JoinNonEmpty(";");
         }
 
         /// <summary>
