@@ -93,7 +93,7 @@ export const FileDropzone = ({
     onDropAccepted,
     onDropRejected,
     maxFiles: 1,
-    maxSize: maxUploadSizeBytes ?? 209715200 // 200 MB,
+    maxSize: maxUploadSizeBytes ?? 209715200, // 200 MB
     accept: acceptedFileTypes,
   });
 
