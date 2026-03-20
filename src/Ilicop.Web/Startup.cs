@@ -26,11 +26,14 @@ namespace Geowerkstatt.Ilicop.Web
 {
     public class Startup
     {
-        private const int MaxRequestBodySize = 209715200;
+        private readonly int maxRequestBodySize;
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            var configuredSizeMb = configuration.GetValue<int?>("ILICOP_MAX_UPLOAD_SIZE_MB");
+            maxRequestBodySize = configuredSizeMb.HasValue ? configuredSizeMb.Value * 1024 * 1024 : 209715200;
         }
 
         public IConfiguration Configuration { get; }
@@ -110,11 +113,11 @@ namespace Geowerkstatt.Ilicop.Web
             });
             services.Configure<FormOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = MaxRequestBodySize;
+                options.MultipartBodyLengthLimit = maxRequestBodySize;
             });
             services.Configure<KestrelServerOptions>(options =>
             {
-                options.Limits.MaxRequestBodySize = MaxRequestBodySize;
+                options.Limits.MaxRequestBodySize = maxRequestBodySize;
             });
             services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
             services.AddSwaggerGen(options =>
@@ -156,7 +159,7 @@ namespace Geowerkstatt.Ilicop.Web
             // By default Kestrel responds with a HTTP 400 if payload is too large.
             app.Use(async (context, next) =>
             {
-                if (context.Request.ContentLength > MaxRequestBodySize)
+                if (context.Request.ContentLength > maxRequestBodySize)
                 {
                     context.Response.StatusCode = StatusCodes.Status413PayloadTooLarge;
                     await context.Response.WriteAsync("Payload Too Large");
