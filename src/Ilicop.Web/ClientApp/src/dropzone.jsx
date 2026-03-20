@@ -33,6 +33,7 @@ const Container = styled.div`
 
 export const FileDropzone = ({
   acceptedFileTypes,
+  maxUploadSizeBytes,
   fileToCheck,
   fileToCheckRef,
   setFileToCheck,
@@ -92,7 +93,7 @@ export const FileDropzone = ({
     onDropAccepted,
     onDropRejected,
     maxFiles: 1,
-    maxSize: 209715200,
+    maxSize: maxUploadSizeBytes ?? 209715200 // 200 MB,
     accept: acceptedFileTypes,
   });
 

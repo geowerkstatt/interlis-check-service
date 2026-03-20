@@ -41,5 +41,10 @@ namespace Geowerkstatt.Ilicop.Web.Contracts
         /// </summary>
         [Required]
         public string AcceptedFileTypes { get; set; }
+
+        /// <summary>
+        /// The maximum upload size in bytes if configured; otherwise, <c>null</c>.
+        /// </summary>
+        public int? MaxUploadSizeBytes { get; set; }
     }
 }

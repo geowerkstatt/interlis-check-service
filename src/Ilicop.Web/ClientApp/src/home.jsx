@@ -131,6 +131,7 @@ export const Home = (props) => {
       <Container>
         <FileDropzone
           acceptedFileTypes={clientSettings?.acceptedFileTypes}
+          maxUploadSizeBytes={clientSettings?.maxUploadSizeBytes}
           fileToCheck={fileToCheck}
           fileToCheckRef={fileToCheckRef}
           setFileToCheck={setFileToCheck}
