@@ -158,6 +158,10 @@ services:
     #   - CUSTOM_VENDOR_LINK=https://www.example.com
     #     Optional link to the vendors webpage
     #     The link is only taken into account if there is a corresponding vendor.png
+    #
+    #   - ILICOP_MAX_UPLOAD_SIZE_MB=200
+    #     Optional maximum upload size in megabytes
+    #     Default 200 MB
     environment:
       - PUID=1000
       - PGID=1000

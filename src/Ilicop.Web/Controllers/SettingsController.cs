@@ -44,6 +44,7 @@ namespace Geowerkstatt.Ilicop.Web.Controllers
                     ? (ilitoolsEnvironment.Ili2GpkgVersion ?? "undefined/not configured")
                     : "disabled",
                 AcceptedFileTypes = GetAcceptedFileExtensionsForUserUploads(configuration).JoinNonEmpty(", "),
+                MaxUploadSizeBytes = configuration.GetValue<int?>("ILICOP_MAX_UPLOAD_SIZE_MB") is int mb ? mb * 1024 * 1024 : null,
             });
         }
     }
