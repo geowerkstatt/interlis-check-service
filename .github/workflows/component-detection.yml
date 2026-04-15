@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: write
-  packages: read
 
 jobs:
   component-detection:
@@ -24,13 +23,8 @@ jobs:
         with:
           dotnet-version: '10.0'
 
-      - name: Add GitHub NuGet Registry
-        run: dotnet nuget add source --username "${{ github.actor }}" --password "%GITHUB_TOKEN%" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/GeoWerkstatt/index.json"
-
       - name: Install dependencies
         run: dotnet restore
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Run manual component detection for NuGet after
       # restoring packages from the GitHub registry.

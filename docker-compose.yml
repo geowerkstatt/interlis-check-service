@@ -1,10 +1,3 @@
-# Add secrets for username and token for authentication to GeoW.Interlis.Tools NuGet feed
-secrets:
-  github_nuget_user:
-    file: ./github_nuget_user.txt
-  github_nuget_token:
-    file: ./github_nuget_token.txt
-
 services:
   web:
     # Docker image (NAME:TAG)
@@ -31,9 +24,6 @@ services:
       args:
         - VERSION=0.1.100
         - REVISION=abcdefg
-      secrets:
-        - github_nuget_user
-        - github_nuget_token
     # Docker container restart behavior
     restart: unless-stopped
     # Mount paths as volumes
