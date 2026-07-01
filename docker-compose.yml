@@ -66,6 +66,8 @@ services:
     #               - nutzungsbestimmungen.md (terms of use as Markdown-formatted document)
     #                 Adding this document means the user must agree to the terms prior validation
     #               - quickstart.txt (line-separated brief instructions as plain text document)
+    #     The app logo (app.png) and the document assets (*.md, quickstart.txt) support language-specific
+    #     variants (i.e. impressum.fr.md)
     #
     #   - /path/to/local/model/repository:/repository
     #     Folder containing the local model repository
