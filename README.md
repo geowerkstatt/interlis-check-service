@@ -15,6 +15,11 @@ Webbasierter Checkservice für INTERLIS Datenabgaben
   - [ilivalidator](#ilivalidator)
   - [Web-Check-Service](#web-check-service)
 - [REST API](#rest-api)
+- [Konfiguration von Prüfprofilen](#konfiguration-von-prüfprofilen)
+  - [ilidata.xml Konfiguration](#ilidataxml-konfiguration)
+    - [Default-Profil](#default-profil)
+    - [Spezifisches erweitertes Profil](#spezifisches-erweitertes-profil)
+- [QGIS-Projekt Konfiguration](#qgis-projekt-konfiguration)
 - [Health Check API](#health-check-api)
 - [Einrichten der Entwicklungsumgebung](#einrichten-der-entwicklungsumgebung)
 - [Neue Version erstellen](#neue-version-erstellen)
@@ -389,6 +394,15 @@ msg="Benutzerschlüssel ist nicht eindeutig (Attributkombination: NBIdent, Ident
 msg_fr="La clé utilisateur n'est pas unique (Combinaison d'attributs : IdentDN, Identification)"
 ...
 ```
+
+## QGIS-Projekt Konfiguration
+
+Das QGIS-Projekt, welches für den Kartendienst verwendet wird, muss die folgenden zu prüfenden Eigenschaften umfassen:
+
+* Layernamen dürfen keine Leer- oder Sonderzeichen enthalten
+* Legende muss einen (1) top-Layer enthalten, da das Laden der Legende über einen Layer 0 erfolgt.
+* Das Projekt muss vor der Publizierung auf QGIS Server Konformität geprüft werden: Project > Eigenschaften > QGIS Server > Testkonfiguration > Starten... (Erwartung: "Projekt ist gültig")
+* Räumliche Ausdehnung des Dienstes prüfen!
 
 ## Health Check API
 
