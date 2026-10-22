@@ -49,7 +49,7 @@
     "eslint-plugin-react": "^7.32.2",
     "jsdom": "^25.0.1",
     "license-checker": "^25.0.1",
-    "vite": "^8.1.1",
+    "vite": "^8.3.5",
     "vitest": "^4.1.11"
   }
 }
